@@ -892,82 +892,60 @@
             adminBtn.disabled = true;
             
             try {
+                // Always use demo mode for reliable access
+                console.log('Using demo admin mode...');
+                currentUser = { email: 'admin@demo.com', uid: 'demo-admin' };
+                currentUserRole = 'admin';
+                
+                // Try to create admin in Firebase if available
                 if (window.auth && window.firebaseAuth && window.db && window.firestore) {
-                    // Try to sign in with existing admin credentials
-                    const adminEmail = 'admin@test.com';
-                    const adminPassword = 'admin123';
-                    
                     try {
-                        // Try to sign in first
-                        const userCredential = await window.firebaseAuth.signInWithEmailAndPassword(window.auth, adminEmail, adminPassword);
+                        const adminEmail = 'admin@demo.com';
+                        const adminPassword = 'admin123456';
                         
-                        // Set admin role in Firestore if not exists
-                        const userDocRef = window.firestore.doc(window.db, 'users', userCredential.user.uid);
-                        const userDoc = await window.firestore.getDoc(userDocRef);
-                        
-                        if (!userDoc.exists()) {
-                            await window.firestore.setDoc(userDocRef, {
-                                name: 'Administrator',
-                                role: 'admin',
-                                email: adminEmail,
-                                createdAt: new Date().toISOString()
-                            });
-                        }
-                        
-                        showToast('เข้าสู่ระบบแอดมินสำเร็จ', 'success');
-                        
-                    } catch (signInError) {
-                        // If sign in fails, try to create admin account
-                        if (signInError.code === 'auth/user-not-found' || signInError.code === 'auth/wrong-password' || signInError.code === 'auth/invalid-credential') {
-                            try {
+                        // Try to create or sign in admin
+                        let userCredential;
+                        try {
+                            userCredential = await window.firebaseAuth.signInWithEmailAndPassword(window.auth, adminEmail, adminPassword);
+                        } catch (signInError) {
+                            if (signInError.code === 'auth/user-not-found' || signInError.code === 'auth/invalid-credential') {
                                 const { createUserWithEmailAndPassword } = await import('https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js');
-                                const userCredential = await createUserWithEmailAndPassword(window.auth, adminEmail, adminPassword);
-                                
-                                // Set admin role in Firestore
-                                await window.firestore.setDoc(window.firestore.doc(window.db, 'users', userCredential.user.uid), {
-                                    name: 'Administrator',
-                                    role: 'admin',
-                                    email: adminEmail,
-                                    createdAt: new Date().toISOString()
-                                });
-                                
-                                showToast('สร้างบัญชีแอดมินและเข้าสู่ระบบสำเร็จ', 'success');
-                                
-                            } catch (createError) {
-                                console.error('Error creating admin account:', createError);
-                                // Fall back to demo mode
-                                currentUser = { email: 'admin@test.com', uid: 'admin' };
-                                currentUserRole = 'admin';
-                                await loadAdminData();
-                                showScreen('admin');
-                                showToast('เข้าสู่ระบบแอดมิน (Demo Mode)', 'info');
+                                userCredential = await createUserWithEmailAndPassword(window.auth, adminEmail, adminPassword);
+                            } else {
+                                throw signInError;
                             }
-                        } else {
-                            throw signInError;
                         }
+                        
+                        // Update user object with Firebase user
+                        currentUser = userCredential.user;
+                        
+                        // Set admin role in Firestore
+                        const userDocRef = window.firestore.doc(window.db, 'users', userCredential.user.uid);
+                        await window.firestore.setDoc(userDocRef, {
+                            name: 'ผู้ดูแลระบบ',
+                            role: 'admin',
+                            status: 'approved',
+                            email: adminEmail,
+                            createdAt: new Date().toISOString()
+                        }, { merge: true });
+                        
+                        console.log('Firebase admin setup complete');
+                        showToast('เข้าสู่ระบบแอดมินสำเร็จ (Firebase)', 'success');
+                        
+                    } catch (firebaseError) {
+                        console.warn('Firebase admin setup failed, using demo mode:', firebaseError);
+                        showToast('เข้าสู่ระบบแอดมิน (Demo Mode)', 'info');
                     }
                 } else {
-                    // Demo mode - direct admin access
-                    currentUser = { email: 'admin@test.com', uid: 'admin' };
-                    currentUserRole = 'admin';
-                    await loadAdminData();
-                    showScreen('admin');
                     showToast('เข้าสู่ระบบแอดมิน (Demo Mode)', 'info');
                 }
+                
+                await loadAdminData();
+                showScreen('admin');
+                
             } catch (error) {
                 console.error('Admin login error:', error);
-                
-                // Always fall back to demo mode if there's any error
-                try {
-                    currentUser = { email: 'admin@test.com', uid: 'admin' };
-                    currentUserRole = 'admin';
-                    await loadAdminData();
-                    showScreen('admin');
-                    showToast('เข้าสู่ระบบแอดมิน (Demo Mode)', 'info');
-                } catch (demoError) {
-                    console.error('Demo mode error:', demoError);
-                    showToast('เกิดข้อผิดพลาดในการเข้าสู่ระบบ', 'error');
-                }
+                showToast('เกิดข้อผิดพลาดในการเข้าสู่ระบบ', 'error');
             } finally {
                 adminBtn.innerHTML = originalContent;
                 adminBtn.disabled = false;
@@ -994,29 +972,52 @@
         // Load questions from Firestore
         async function loadQuestions() {
             try {
+                questions = [];
+                
                 if (window.db && window.firestore) {
-                    const questionsQuery = window.firestore.query(
-                        window.firestore.collection(window.db, 'questionBank'),
-                        window.firestore.orderBy('questionText')
-                    );
-                    const querySnapshot = await window.firestore.getDocs(questionsQuery);
-                    
-                    questions = [];
-                    querySnapshot.forEach((doc) => {
-                        questions.push({ id: doc.id, ...doc.data() });
-                    });
-                    
-                    if (questions.length === 0) {
-                        // Add sample questions if none exist
-                        for (const question of sampleQuestions) {
-                            await window.firestore.addDoc(window.firestore.collection(window.db, 'questionBank'), question);
+                    console.log('Loading questions from Firebase...');
+                    try {
+                        const questionsQuery = window.firestore.query(
+                            window.firestore.collection(window.db, 'questionBank'),
+                            window.firestore.orderBy('questionText')
+                        );
+                        const querySnapshot = await window.firestore.getDocs(questionsQuery);
+                        
+                        querySnapshot.forEach((doc) => {
+                            questions.push({ id: doc.id, ...doc.data() });
+                        });
+                        
+                        console.log('Firebase questions loaded:', questions.length);
+                        
+                        // Add sample questions if none exist in Firebase
+                        if (questions.length === 0) {
+                            console.log('No questions in Firebase, adding sample questions...');
+                            for (const question of sampleQuestions) {
+                                await window.firestore.addDoc(window.firestore.collection(window.db, 'questionBank'), question);
+                            }
+                            // Reload after adding
+                            const newQuerySnapshot = await window.firestore.getDocs(questionsQuery);
+                            questions = [];
+                            newQuerySnapshot.forEach((doc) => {
+                                questions.push({ id: doc.id, ...doc.data() });
+                            });
+                            console.log('Sample questions added to Firebase:', questions.length);
                         }
-                        await loadQuestions(); // Reload after adding
-                        return;
+                    } catch (firebaseError) {
+                        console.warn('Firebase questions loading failed:', firebaseError);
+                        questions = [...sampleQuestions];
+                        console.log('Using demo questions due to Firebase error');
                     }
                 } else {
                     // Use sample questions in demo mode
+                    console.log('Using demo questions (Firebase not available)');
                     questions = [...sampleQuestions];
+                }
+                
+                // Ensure we have questions
+                if (questions.length === 0) {
+                    questions = [...sampleQuestions];
+                    console.log('Fallback to sample questions');
                 }
                 
                 // สุ่มลำดับข้อสอบ
@@ -1035,9 +1036,15 @@
                 document.getElementById('totalQuestions').textContent = questions.length;
                 document.getElementById('totalQ').textContent = questions.length;
                 
+                console.log('Questions ready for exam:', questions.length);
+                
             } catch (error) {
                 console.error('Error loading questions:', error);
-                showToast('เกิดข้อผิดพลาดในการโหลดข้อสอบ', 'error');
+                // Final fallback
+                questions = [...sampleQuestions];
+                document.getElementById('totalQuestions').textContent = questions.length;
+                document.getElementById('totalQ').textContent = questions.length;
+                showToast('ใช้ข้อสอบตัวอย่าง (เกิดข้อผิดพลาด)', 'info');
             }
         }
 
@@ -1379,81 +1386,127 @@
             document.getElementById('membersEmpty').classList.add('hidden');
             
             try {
-                // Always use demo data for now to ensure it works
-                members = [
-                    {
-                        id: '1',
-                        name: 'นาย ทดสอบ ระบบ',
-                        email: 'test@example.com',
-                        phone: '081-234-5678',
-                        organization: 'บริษัท ทดสอบ จำกัด',
-                        role: 'student',
-                        status: 'pending',
-                        createdAt: new Date().toISOString()
-                    },
-                    {
-                        id: '2',
-                        name: 'นางสาว ตัวอย่าง ข้อมูล',
-                        email: 'example@test.com',
-                        phone: '082-345-6789',
-                        organization: 'หน่วยงานรัฐ',
-                        role: 'student',
-                        status: 'approved',
-                        createdAt: new Date(Date.now() - 86400000).toISOString()
-                    },
-                    {
-                        id: '3',
-                        name: 'นาย สมชาย ใจดี',
-                        email: 'somchai@company.com',
-                        phone: '083-456-7890',
-                        organization: 'บริษัท ABC จำกัด',
-                        role: 'student',
-                        status: 'pending',
-                        createdAt: new Date(Date.now() - 3600000).toISOString()
-                    },
-                    {
-                        id: '4',
-                        name: 'นาย ปิติ สนใจ',
-                        email: 'piti@university.ac.th',
-                        phone: '085-678-9012',
-                        organization: 'มหาวิทยาลัย XYZ',
-                        role: 'student',
-                        status: 'rejected',
-                        createdAt: new Date(Date.now() - 259200000).toISOString()
-                    },
-                    {
-                        id: '5',
-                        name: 'นางสาว มานี ดีใจ',
-                        email: 'manee@company.co.th',
-                        phone: '086-789-0123',
-                        organization: 'บริษัท DEF จำกัด',
-                        role: 'student',
-                        status: 'approved',
-                        createdAt: new Date(Date.now() - 432000000).toISOString()
-                    }
-                ];
+                members = [];
                 
-                console.log('Members loaded:', members.length);
-                
-                // Simulate loading delay
-                setTimeout(() => {
-                    // Hide loading state
-                    document.getElementById('membersLoading').classList.add('hidden');
+                if (window.db && window.firestore) {
+                    // Load from Firebase
+                    console.log('Loading from Firebase...');
+                    const usersQuery = window.firestore.query(
+                        window.firestore.collection(window.db, 'users'),
+                        window.firestore.orderBy('createdAt', 'desc')
+                    );
+                    const querySnapshot = await window.firestore.getDocs(usersQuery);
                     
-                    if (members.length === 0) {
-                        document.getElementById('membersEmpty').classList.remove('hidden');
-                    } else {
-                        document.getElementById('membersTable').classList.remove('hidden');
-                        updateMembersTable();
-                        updatePendingAlert();
-                    }
-                }, 500);
+                    querySnapshot.forEach((doc) => {
+                        const userData = doc.data();
+                        members.push({
+                            id: doc.id,
+                            name: userData.name || userData.email,
+                            email: userData.email,
+                            phone: userData.phone || '-',
+                            organization: userData.organization || '-',
+                            role: userData.role || 'student',
+                            status: userData.status || 'pending',
+                            createdAt: userData.createdAt || new Date().toISOString()
+                        });
+                    });
+                    
+                    console.log('Firebase members loaded:', members.length);
+                } 
+                
+                // If no Firebase data or Firebase not available, use demo data
+                if (members.length === 0) {
+                    console.log('Using demo data...');
+                    members = [
+                        {
+                            id: 'demo1',
+                            name: 'นาย ทดสอบ ระบบ',
+                            email: 'test@example.com',
+                            phone: '081-234-5678',
+                            organization: 'บริษัท ทดสอบ จำกัด',
+                            role: 'student',
+                            status: 'pending',
+                            createdAt: new Date().toISOString()
+                        },
+                        {
+                            id: 'demo2',
+                            name: 'นางสาว ตัวอย่าง ข้อมูล',
+                            email: 'example@test.com',
+                            phone: '082-345-6789',
+                            organization: 'หน่วยงานรัฐ',
+                            role: 'student',
+                            status: 'approved',
+                            createdAt: new Date(Date.now() - 86400000).toISOString()
+                        },
+                        {
+                            id: 'demo3',
+                            name: 'นาย สมชาย ใจดี',
+                            email: 'somchai@company.com',
+                            phone: '083-456-7890',
+                            organization: 'บริษัท ABC จำกัด',
+                            role: 'student',
+                            status: 'pending',
+                            createdAt: new Date(Date.now() - 3600000).toISOString()
+                        },
+                        {
+                            id: 'demo4',
+                            name: 'นาย ปิติ สนใจ',
+                            email: 'piti@university.ac.th',
+                            phone: '085-678-9012',
+                            organization: 'มหาวิทยาลัย XYZ',
+                            role: 'student',
+                            status: 'rejected',
+                            createdAt: new Date(Date.now() - 259200000).toISOString()
+                        },
+                        {
+                            id: 'demo5',
+                            name: 'นางสาว มานี ดีใจ',
+                            email: 'manee@company.co.th',
+                            phone: '086-789-0123',
+                            organization: 'บริษัท DEF จำกัด',
+                            role: 'student',
+                            status: 'approved',
+                            createdAt: new Date(Date.now() - 432000000).toISOString()
+                        }
+                    ];
+                }
+                
+                console.log('Total members loaded:', members.length);
+                
+                // Hide loading state and show data
+                document.getElementById('membersLoading').classList.add('hidden');
+                
+                if (members.length === 0) {
+                    document.getElementById('membersEmpty').classList.remove('hidden');
+                } else {
+                    document.getElementById('membersTable').classList.remove('hidden');
+                    updateMembersTable();
+                    updatePendingAlert();
+                }
                 
             } catch (error) {
                 console.error('Error loading members:', error);
                 document.getElementById('membersLoading').classList.add('hidden');
-                document.getElementById('membersEmpty').classList.remove('hidden');
-                showToast('เกิดข้อผิดพลาดในการโหลดข้อมูลสมาชิก', 'error');
+                
+                // Show demo data on error
+                members = [
+                    {
+                        id: 'error1',
+                        name: 'ข้อมูลตัวอย่าง (เกิดข้อผิดพลาด)',
+                        email: 'demo@error.com',
+                        phone: '081-000-0000',
+                        organization: 'ระบบ Demo',
+                        role: 'student',
+                        status: 'pending',
+                        createdAt: new Date().toISOString()
+                    }
+                ];
+                
+                document.getElementById('membersTable').classList.remove('hidden');
+                updateMembersTable();
+                updatePendingAlert();
+                
+                showToast('ใช้ข้อมูลตัวอย่าง (Firebase ไม่พร้อมใช้งาน)', 'info');
             }
         }
 
@@ -1559,16 +1612,20 @@
 
         async function approveMember(memberId) {
             try {
-                if (window.db && window.firestore) {
+                console.log('Approving member:', memberId);
+                
+                if (window.db && window.firestore && !memberId.startsWith('demo')) {
                     await window.firestore.setDoc(window.firestore.doc(window.db, 'users', memberId), {
                         status: 'approved'
                     }, { merge: true });
+                    console.log('Firebase update successful');
                 }
                 
                 // Update local data
                 const member = members.find(m => m.id === memberId);
                 if (member) {
                     member.status = 'approved';
+                    console.log('Local data updated');
                 }
                 
                 updateMembersTable();
@@ -1583,16 +1640,20 @@
 
         async function rejectMember(memberId) {
             try {
-                if (window.db && window.firestore) {
+                console.log('Rejecting member:', memberId);
+                
+                if (window.db && window.firestore && !memberId.startsWith('demo')) {
                     await window.firestore.setDoc(window.firestore.doc(window.db, 'users', memberId), {
                         status: 'rejected'
                     }, { merge: true });
+                    console.log('Firebase update successful');
                 }
                 
                 // Update local data
                 const member = members.find(m => m.id === memberId);
                 if (member) {
                     member.status = 'rejected';
+                    console.log('Local data updated');
                 }
                 
                 updateMembersTable();
@@ -1607,16 +1668,20 @@
 
         async function changeUserRole(memberId, newRole) {
             try {
-                if (window.db && window.firestore) {
+                console.log('Changing user role:', memberId, newRole);
+                
+                if (window.db && window.firestore && !memberId.startsWith('demo')) {
                     await window.firestore.setDoc(window.firestore.doc(window.db, 'users', memberId), {
                         role: newRole
                     }, { merge: true });
+                    console.log('Firebase role update successful');
                 }
                 
                 // Update local data
                 const member = members.find(m => m.id === memberId);
                 if (member) {
                     member.role = newRole;
+                    console.log('Local role data updated');
                 }
                 
                 updateMembersTable();
@@ -1630,16 +1695,20 @@
 
         async function suspendMember(memberId) {
             try {
-                if (window.db && window.firestore) {
+                console.log('Suspending member:', memberId);
+                
+                if (window.db && window.firestore && !memberId.startsWith('demo')) {
                     await window.firestore.setDoc(window.firestore.doc(window.db, 'users', memberId), {
-                        status: 'rejected'
+                        status: 'suspended'
                     }, { merge: true });
+                    console.log('Firebase suspend update successful');
                 }
                 
                 // Update local data
                 const member = members.find(m => m.id === memberId);
                 if (member) {
-                    member.status = 'rejected';
+                    member.status = 'suspended';
+                    console.log('Local suspend data updated');
                 }
                 
                 updateMembersTable();
@@ -1982,34 +2051,94 @@
         // Admin functions
         async function loadAdminData() {
             try {
-                // Demo data
-                examResults = [
-                    {
-                        name: 'student@test.com',
-                        score: 85,
-                        timeUsed: 1200,
-                        submittedAt: new Date().toISOString()
-                    },
-                    {
-                        name: 'demo@test.com',
-                        score: 45,
-                        timeUsed: 1800,
-                        submittedAt: new Date(Date.now() - 86400000).toISOString()
+                console.log('Loading admin data...');
+                examResults = [];
+                
+                // Load exam results from Firebase
+                if (window.db && window.firestore) {
+                    try {
+                        console.log('Loading exam results from Firebase...');
+                        const resultsQuery = window.firestore.query(
+                            window.firestore.collection(window.db, 'examResults'),
+                            window.firestore.orderBy('submittedAt', 'desc')
+                        );
+                        const querySnapshot = await window.firestore.getDocs(resultsQuery);
+                        
+                        querySnapshot.forEach((doc) => {
+                            const resultData = doc.data();
+                            examResults.push({
+                                id: doc.id,
+                                name: resultData.name || resultData.email || 'ไม่ระบุ',
+                                score: resultData.score || 0,
+                                timeUsed: resultData.timeUsed || 0,
+                                submittedAt: resultData.submittedAt || new Date().toISOString()
+                            });
+                        });
+                        
+                        console.log('Firebase exam results loaded:', examResults.length);
+                    } catch (firebaseError) {
+                        console.warn('Firebase exam results loading failed:', firebaseError);
                     }
-                ];
+                }
+                
+                // Use demo data if no Firebase data
+                if (examResults.length === 0) {
+                    console.log('Using demo exam results...');
+                    examResults = [
+                        {
+                            id: 'demo1',
+                            name: 'นักเรียนตัวอย่าง 1',
+                            score: 85,
+                            timeUsed: 1200,
+                            submittedAt: new Date().toISOString()
+                        },
+                        {
+                            id: 'demo2',
+                            name: 'นักเรียนตัวอย่าง 2',
+                            score: 45,
+                            timeUsed: 1800,
+                            submittedAt: new Date(Date.now() - 86400000).toISOString()
+                        },
+                        {
+                            id: 'demo3',
+                            name: 'นักเรียนตัวอย่าง 3',
+                            score: 92,
+                            timeUsed: 900,
+                            submittedAt: new Date(Date.now() - 3600000).toISOString()
+                        }
+                    ];
+                }
                 
                 updateAdminStats();
                 updateResultsTable();
                 await loadQuestionsForAdmin();
                 
                 // Load members when admin screen is shown
+                console.log('Triggering member load...');
                 setTimeout(() => {
                     loadMembers();
-                }, 100);
+                }, 200);
+                
+                console.log('Admin data loading complete');
                 
             } catch (error) {
                 console.error('Error loading admin data:', error);
-                showToast('เกิดข้อผิดพลาดในการโหลดข้อมูล', 'error');
+                
+                // Fallback data
+                examResults = [
+                    {
+                        id: 'fallback1',
+                        name: 'ข้อมูลตัวอย่าง (เกิดข้อผิดพลาด)',
+                        score: 75,
+                        timeUsed: 1500,
+                        submittedAt: new Date().toISOString()
+                    }
+                ];
+                
+                updateAdminStats();
+                updateResultsTable();
+                
+                showToast('ใช้ข้อมูลตัวอย่าง (เกิดข้อผิดพลาด)', 'info');
             }
         }
 
@@ -2471,5 +2600,5 @@
             });
         });
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99f4812685454ba6',t:'MTc2MzI3MDA2My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99f490ae22ef10f8',t:'MTc2MzI3MDY5OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
