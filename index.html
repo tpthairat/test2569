@@ -138,9 +138,57 @@
      </div><button type="submit" id="loginBtn" class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition duration-200 font-medium"> เข้าสู่ระบบ </button>
     </form>
     <div class="mt-6 pt-6 border-t border-gray-200">
-     <p class="text-center text-sm text-gray-600 mb-4">หรือ</p><button onclick="loginAsAdmin()" class="w-full bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 transition duration-200 font-medium flex items-center justify-center">
-      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 2.676-.732 5.094-2.85 6.618-5.622z"></path>
-      </svg> เข้าสู่ระบบแอดมิน </button>
+     <p class="text-center text-sm text-gray-600 mb-4">หรือ</p>
+     <div class="space-y-3"><button onclick="showRegisterForm()" class="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition duration-200 font-medium flex items-center justify-center">
+       <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+       </svg> สมัครสมาชิก </button> <button onclick="loginAsAdmin()" class="w-full bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 transition duration-200 font-medium flex items-center justify-center">
+       <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 2.676-.732 5.094-2.85 6.618-5.622z"></path>
+       </svg> เข้าสู่ระบบแอดมิน </button>
+     </div>
+    </div>
+   </div>
+  </div><!-- Register Screen -->
+  <div id="registerScreen" class="min-h-full flex items-center justify-center p-4 hidden">
+   <div class="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
+    <div class="text-center mb-8">
+     <h1 class="text-3xl font-bold text-gray-900 mb-2">สมัครสมาชิก</h1>
+     <p class="text-gray-600">กรอกข้อมูลเพื่อสมัครเข้าใช้งานระบบ</p>
+    </div>
+    <form id="registerForm" class="space-y-6">
+     <div><label for="regName" class="block text-sm font-medium text-gray-700 mb-2">ชื่อ-นามสกุล</label> <input type="text" id="regName" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+     </div>
+     <div><label for="regEmail" class="block text-sm font-medium text-gray-700 mb-2">อีเมล</label> <input type="email" id="regEmail" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+     </div>
+     <div><label for="regPassword" class="block text-sm font-medium text-gray-700 mb-2">รหัสผ่าน</label> <input type="password" id="regPassword" required minlength="6" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+     </div>
+     <div><label for="regConfirmPassword" class="block text-sm font-medium text-gray-700 mb-2">ยืนยันรหัสผ่าน</label> <input type="password" id="regConfirmPassword" required minlength="6" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+     </div>
+     <div><label for="regPhone" class="block text-sm font-medium text-gray-700 mb-2">เบอร์โทรศัพท์</label> <input type="tel" id="regPhone" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+     </div>
+     <div><label for="regOrganization" class="block text-sm font-medium text-gray-700 mb-2">หน่วยงาน/องค์กร</label> <input type="text" id="regOrganization" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+     </div><button type="submit" id="registerBtn" class="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition duration-200 font-medium"> สมัครสมาชิก </button>
+    </form>
+    <div class="mt-6 text-center"><button onclick="showScreen('login')" class="text-blue-600 hover:text-blue-800 text-sm"> กลับไปหน้าเข้าสู่ระบบ </button>
+    </div>
+   </div>
+  </div><!-- Pending Approval Screen -->
+  <div id="pendingScreen" class="min-h-full flex items-center justify-center p-4 hidden">
+   <div class="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
+    <div class="text-6xl mb-4">
+     ⏳
+    </div>
+    <h1 class="text-2xl font-bold text-gray-900 mb-4">รอการอนุมัติ</h1>
+    <p class="text-gray-600 mb-6">บัญชีของคุณอยู่ระหว่างการพิจารณาจากแอดมิน<br>
+     กรุณารอการอนุมัติเพื่อเข้าใช้งานระบบ</p>
+    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+     <div class="flex items-center"><span class="text-yellow-600 mr-2">📧</span>
+      <div class="text-left">
+       <p class="text-sm font-medium text-yellow-800">อีเมลที่สมัคร:</p>
+       <p class="text-sm text-yellow-700" id="pendingEmail">-</p>
+      </div>
+     </div>
+    </div>
+    <div class="flex gap-3 justify-center"><button onclick="checkApprovalStatus()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200"> ตรวจสอบสถานะ </button> <button onclick="logout()" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition duration-200"> ออกจากระบบ </button>
     </div>
    </div>
   </div><!-- Student Exam Screen -->
@@ -221,6 +269,94 @@
       </div>
       <div id="reviewQuestions" class="space-y-6"><!-- Review questions will be inserted here -->
       </div>
+     </div><!-- Members Tab -->
+     <div id="membersTabContent" class="p-6 hidden">
+      <div class="flex justify-between items-center mb-6">
+       <h3 class="text-lg font-medium">จัดการสมาชิก</h3>
+       <div class="flex gap-2"><select id="memberStatusFilter" onchange="filterMembers()" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"> <option value="all">ทั้งหมด</option> <option value="pending">รอการอนุมัติ</option> <option value="approved">อนุมัติแล้ว</option> <option value="rejected">ปฏิเสธ</option> </select>
+       </div>
+      </div><!-- Pending Approvals Alert -->
+      <div id="pendingAlert" class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6 hidden">
+       <div class="flex items-center"><span class="text-yellow-600 mr-2">⚠️</span>
+        <div>
+         <p class="font-medium text-yellow-800">มีสมาชิกรอการอนุมัติ</p>
+         <p class="text-sm text-yellow-700">มีสมาชิก <span id="pendingCount">0</span> คนรอการอนุมัติจากคุณ</p>
+        </div>
+       </div>
+      </div>
+      <div class="overflow-x-auto">
+       <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+         <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ชื่อ-นามสกุล</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">อีเมล</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">หน่วยงาน</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">สิทธิ์</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">สถานะ</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">วันที่สมัคร</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">การจัดการ</th>
+         </tr>
+        </thead>
+        <tbody id="membersTableBody" class="bg-white divide-y divide-gray-200"><!-- Members will be inserted here -->
+        </tbody>
+       </table>
+      </div>
+     </div><!-- Import Tab -->
+     <div id="importTabContent" class="p-6 hidden">
+      <div class="max-w-4xl">
+       <h3 class="text-lg font-medium mb-6">นำเข้าข้อสอบ</h3><!-- File Upload Section -->
+       <div class="bg-gray-50 rounded-lg p-6 mb-6">
+        <h4 class="text-md font-medium mb-4">อัปโหลดไฟล์ข้อสอบ</h4>
+        <div class="space-y-4">
+         <div><label class="block text-sm font-medium text-gray-700 mb-2">เลือกไฟล์</label> <input type="file" id="examFileInput" accept=".csv,.xlsx,.xls,.pdf" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+          <p class="text-xs text-gray-500 mt-1">รองรับไฟล์: CSV, Excel (.xlsx, .xls), PDF</p>
+         </div>
+         <div class="flex gap-4"><button onclick="processImportFile()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200"> นำเข้าข้อสอบ </button> <button onclick="downloadTemplate()" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition duration-200"> ดาวน์โหลดแม่แบบ CSV </button>
+         </div>
+        </div>
+       </div><!-- Import Preview -->
+       <div id="importPreview" class="bg-white border border-gray-200 rounded-lg p-6 hidden">
+        <div class="flex justify-between items-center mb-4">
+         <h4 class="text-md font-medium">ตัวอย่างข้อสอบที่จะนำเข้า</h4><span id="importCount" class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">0 ข้อ</span>
+        </div>
+        <div class="overflow-x-auto mb-4">
+         <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+           <tr>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">คำถาม</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">ตัวเลือก A</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">ตัวเลือก B</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">ตัวเลือก C</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">ตัวเลือก D</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">คำตอบ</th>
+           </tr>
+          </thead>
+          <tbody id="importPreviewBody" class="bg-white divide-y divide-gray-200"><!-- Preview data will be inserted here -->
+          </tbody>
+         </table>
+        </div>
+        <div class="flex gap-4"><button onclick="confirmImport()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-200"> ยืนยันการนำเข้า </button> <button onclick="cancelImport()" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition duration-200"> ยกเลิก </button>
+        </div>
+       </div><!-- Import Instructions -->
+       <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+        <h4 class="text-md font-medium text-blue-800 mb-3">คำแนะนำการนำเข้าข้อสอบ</h4>
+        <div class="text-sm text-blue-700 space-y-2">
+         <p><strong>รูปแบบ CSV:</strong> ไฟล์ต้องมีคอลัมน์ดังนี้</p>
+         <ul class="list-disc list-inside ml-4 space-y-1">
+          <li>คำถาม (Question)</li>
+          <li>ตัวเลือก A (Option A)</li>
+          <li>ตัวเลือก B (Option B)</li>
+          <li>ตัวเลือก C (Option C)</li>
+          <li>ตัวเลือก D (Option D)</li>
+          <li>คำตอบที่ถูก (Correct Answer: A, B, C, หรือ D)</li>
+          <li>หมวดหมู่ (Category - ไม่บังคับ)</li>
+          <li>คำอธิบาย (Explanation - ไม่บังคับ)</li>
+         </ul>
+         <p><strong>รูปแบบ Excel:</strong> ใช้รูปแบบเดียวกับ CSV</p>
+         <p><strong>รูปแบบ PDF:</strong> ระบบจะพยายามแยกข้อความและแปลงเป็นข้อสอบ (อาจต้องตรวจสอบความถูกต้อง)</p>
+        </div>
+       </div>
+      </div>
      </div>
     </div>
    </div>
@@ -269,7 +405,7 @@
     </div><!-- Tabs -->
     <div class="bg-white rounded-2xl shadow-lg mb-6">
      <div class="border-b border-gray-200">
-      <nav class="flex space-x-8 px-6"><button onclick="showTab('results')" id="resultsTab" class="py-4 px-1 border-b-2 border-blue-500 font-medium text-blue-600"> ผลการสอบ </button> <button onclick="showTab('questions')" id="questionsTab" class="py-4 px-1 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700"> จัดการข้อสอบ </button>
+      <nav class="flex space-x-8 px-6"><button onclick="showTab('results')" id="resultsTab" class="py-4 px-1 border-b-2 border-blue-500 font-medium text-blue-600"> ผลการสอบ </button> <button onclick="showTab('questions')" id="questionsTab" class="py-4 px-1 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700"> จัดการข้อสอบ </button> <button onclick="showTab('members')" id="membersTab" class="py-4 px-1 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700"> จัดการสมาชิก </button> <button onclick="showTab('import')" id="importTab" class="py-4 px-1 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700"> นำเข้าข้อสอบ </button>
       </nav>
      </div><!-- Results Tab -->
      <div id="resultsTabContent" class="p-6">
@@ -325,6 +461,94 @@
       </div><!-- Questions List -->
       <div class="space-y-4" id="questionsList"><!-- Questions will be inserted here -->
       </div>
+     </div><!-- Members Tab -->
+     <div id="membersTabContent" class="p-6 hidden">
+      <div class="flex justify-between items-center mb-6">
+       <h3 class="text-lg font-medium">จัดการสมาชิก</h3>
+       <div class="flex gap-2"><select id="memberStatusFilter" onchange="filterMembers()" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"> <option value="all">ทั้งหมด</option> <option value="pending">รอการอนุมัติ</option> <option value="approved">อนุมัติแล้ว</option> <option value="rejected">ปฏิเสธ</option> </select>
+       </div>
+      </div><!-- Pending Approvals Alert -->
+      <div id="pendingAlert" class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6 hidden">
+       <div class="flex items-center"><span class="text-yellow-600 mr-2">⚠️</span>
+        <div>
+         <p class="font-medium text-yellow-800">มีสมาชิกรอการอนุมัติ</p>
+         <p class="text-sm text-yellow-700">มีสมาชิก <span id="pendingCount">0</span> คนรอการอนุมัติจากคุณ</p>
+        </div>
+       </div>
+      </div>
+      <div class="overflow-x-auto">
+       <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+         <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ชื่อ-นามสกุล</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">อีเมล</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">หน่วยงาน</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">สิทธิ์</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">สถานะ</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">วันที่สมัคร</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">การจัดการ</th>
+         </tr>
+        </thead>
+        <tbody id="membersTableBody" class="bg-white divide-y divide-gray-200"><!-- Members will be inserted here -->
+        </tbody>
+       </table>
+      </div>
+     </div><!-- Import Tab -->
+     <div id="importTabContent" class="p-6 hidden">
+      <div class="max-w-4xl">
+       <h3 class="text-lg font-medium mb-6">นำเข้าข้อสอบ</h3><!-- File Upload Section -->
+       <div class="bg-gray-50 rounded-lg p-6 mb-6">
+        <h4 class="text-md font-medium mb-4">อัปโหลดไฟล์ข้อสอบ</h4>
+        <div class="space-y-4">
+         <div><label class="block text-sm font-medium text-gray-700 mb-2">เลือกไฟล์</label> <input type="file" id="examFileInput" accept=".csv,.xlsx,.xls,.pdf" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+          <p class="text-xs text-gray-500 mt-1">รองรับไฟล์: CSV, Excel (.xlsx, .xls), PDF</p>
+         </div>
+         <div class="flex gap-4"><button onclick="processImportFile()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200"> นำเข้าข้อสอบ </button> <button onclick="downloadTemplate()" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition duration-200"> ดาวน์โหลดแม่แบบ CSV </button>
+         </div>
+        </div>
+       </div><!-- Import Preview -->
+       <div id="importPreview" class="bg-white border border-gray-200 rounded-lg p-6 hidden">
+        <div class="flex justify-between items-center mb-4">
+         <h4 class="text-md font-medium">ตัวอย่างข้อสอบที่จะนำเข้า</h4><span id="importCount" class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">0 ข้อ</span>
+        </div>
+        <div class="overflow-x-auto mb-4">
+         <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+           <tr>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">คำถาม</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">ตัวเลือก A</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">ตัวเลือก B</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">ตัวเลือก C</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">ตัวเลือก D</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">คำตอบ</th>
+           </tr>
+          </thead>
+          <tbody id="importPreviewBody" class="bg-white divide-y divide-gray-200"><!-- Preview data will be inserted here -->
+          </tbody>
+         </table>
+        </div>
+        <div class="flex gap-4"><button onclick="confirmImport()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-200"> ยืนยันการนำเข้า </button> <button onclick="cancelImport()" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition duration-200"> ยกเลิก </button>
+        </div>
+       </div><!-- Import Instructions -->
+       <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+        <h4 class="text-md font-medium text-blue-800 mb-3">คำแนะนำการนำเข้าข้อสอบ</h4>
+        <div class="text-sm text-blue-700 space-y-2">
+         <p><strong>รูปแบบ CSV:</strong> ไฟล์ต้องมีคอลัมน์ดังนี้</p>
+         <ul class="list-disc list-inside ml-4 space-y-1">
+          <li>คำถาม (Question)</li>
+          <li>ตัวเลือก A (Option A)</li>
+          <li>ตัวเลือก B (Option B)</li>
+          <li>ตัวเลือก C (Option C)</li>
+          <li>ตัวเลือก D (Option D)</li>
+          <li>คำตอบที่ถูก (Correct Answer: A, B, C, หรือ D)</li>
+          <li>หมวดหมู่ (Category - ไม่บังคับ)</li>
+          <li>คำอธิบาย (Explanation - ไม่บังคับ)</li>
+         </ul>
+         <p><strong>รูปแบบ Excel:</strong> ใช้รูปแบบเดียวกับ CSV</p>
+         <p><strong>รูปแบบ PDF:</strong> ระบบจะพยายามแยกข้อความและแปลงเป็นข้อสอบ (อาจต้องตรวจสอบความถูกต้อง)</p>
+        </div>
+       </div>
+      </div>
      </div>
     </div>
    </div>
@@ -352,6 +576,8 @@
         let examTimer = null;
         let timeRemaining = 1800; // 30 minutes in seconds
         let examResults = [];
+        let members = [];
+        let importedQuestions = [];
 
         // Sample questions for demo
         const sampleQuestions = [
@@ -515,10 +741,21 @@
                         const userData = userDoc.data();
                         currentUserRole = userData.role;
                         
+                        // ตรวจสอบสถานะการอนุมัติ
+                        if (userData.status === 'pending') {
+                            document.getElementById('pendingEmail').textContent = currentUser.email;
+                            showScreen('pending');
+                            return;
+                        } else if (userData.status === 'rejected') {
+                            showToast('บัญชีของคุณถูกปฏิเสธ กรุณาติดต่อแอดมิน', 'error');
+                            logout();
+                            return;
+                        }
+                        
                         if (currentUserRole === 'admin') {
                             await loadAdminData();
                             showScreen('admin');
-                        } else if (currentUserRole === 'student') {
+                        } else if (currentUserRole === 'student' && userData.status === 'approved') {
                             await loadQuestions();
                             showScreen('exam');
                         } else {
@@ -526,22 +763,26 @@
                             logout();
                         }
                     } else {
-                        // Create default student role for demo
+                        // สร้างบัญชีใหม่ในสถานะรอการอนุมัติ
                         await window.firestore.setDoc(window.firestore.doc(window.db, 'users', uid), {
                             name: currentUser.email,
-                            role: 'student'
+                            email: currentUser.email,
+                            role: 'student',
+                            status: 'pending',
+                            createdAt: new Date().toISOString()
                         });
-                        currentUserRole = 'student';
-                        await loadQuestions();
-                        showScreen('exam');
+                        document.getElementById('pendingEmail').textContent = currentUser.email;
+                        showScreen('pending');
                     }
                 } else {
                     // Demo mode - determine role based on email
                     if (currentUser && currentUser.email === 'admin@test.com') {
                         currentUserRole = 'admin';
+                        await loadAdminData();
                         showScreen('admin');
                     } else {
                         currentUserRole = 'student';
+                        await loadQuestions();
                         showScreen('exam');
                     }
                 }
@@ -980,6 +1221,529 @@
             document.getElementById('questionCard').style.display = 'none';
         }
 
+        // Registration functions
+        function showRegisterForm() {
+            showScreen('register');
+        }
+
+        async function handleRegister(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            const confirmPassword = document.getElementById('regConfirmPassword').value;
+            const phone = document.getElementById('regPhone').value;
+            const organization = document.getElementById('regOrganization').value;
+            
+            if (password !== confirmPassword) {
+                showToast('รหัสผ่านไม่ตรงกัน', 'error');
+                return;
+            }
+            
+            const registerBtn = document.getElementById('registerBtn');
+            registerBtn.innerHTML = '<div class="loading-spinner mx-auto"></div>';
+            registerBtn.disabled = true;
+            
+            try {
+                if (window.auth && window.firebaseAuth && window.db && window.firestore) {
+                    const { createUserWithEmailAndPassword } = await import('https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js');
+                    const userCredential = await createUserWithEmailAndPassword(window.auth, email, password);
+                    
+                    // บันทึกข้อมูลผู้ใช้ในสถานะรอการอนุมัติ
+                    await window.firestore.setDoc(window.firestore.doc(window.db, 'users', userCredential.user.uid), {
+                        name: name,
+                        email: email,
+                        phone: phone || '',
+                        organization: organization || '',
+                        role: 'student',
+                        status: 'pending',
+                        createdAt: new Date().toISOString()
+                    });
+                    
+                    showToast('สมัครสมาชิกสำเร็จ รอการอนุมัติจากแอดมิน', 'success');
+                    document.getElementById('pendingEmail').textContent = email;
+                    showScreen('pending');
+                } else {
+                    // Demo mode
+                    showToast('สมัครสมาชิกสำเร็จ (Demo Mode)', 'success');
+                    currentUser = { email, uid: email.split('@')[0] };
+                    currentUserRole = 'student';
+                    await loadQuestions();
+                    showScreen('exam');
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                if (error.code === 'auth/email-already-in-use') {
+                    showToast('อีเมลนี้ถูกใช้งานแล้ว', 'error');
+                } else if (error.code === 'auth/weak-password') {
+                    showToast('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร', 'error');
+                } else {
+                    showToast('เกิดข้อผิดพลาดในการสมัครสมาชิก', 'error');
+                }
+            } finally {
+                registerBtn.innerHTML = 'สมัครสมาชิก';
+                registerBtn.disabled = false;
+            }
+        }
+
+        async function checkApprovalStatus() {
+            if (!currentUser) return;
+            
+            try {
+                if (window.db && window.firestore) {
+                    const userDoc = await window.firestore.getDoc(window.firestore.doc(window.db, 'users', currentUser.uid));
+                    if (userDoc.exists()) {
+                        const userData = userDoc.data();
+                        if (userData.status === 'approved') {
+                            showToast('บัญชีของคุณได้รับการอนุมัติแล้ว!', 'success');
+                            await checkUserRole(currentUser.uid);
+                        } else if (userData.status === 'rejected') {
+                            showToast('บัญชีของคุณถูกปฏิเสธ', 'error');
+                        } else {
+                            showToast('ยังอยู่ในสถานะรอการอนุมัติ', 'info');
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking approval status:', error);
+                showToast('เกิดข้อผิดพลาดในการตรวจสอบสถานะ', 'error');
+            }
+        }
+
+        // Member management functions
+        async function loadMembers() {
+            try {
+                if (window.db && window.firestore) {
+                    const usersQuery = window.firestore.query(
+                        window.firestore.collection(window.db, 'users'),
+                        window.firestore.orderBy('createdAt', 'desc')
+                    );
+                    const querySnapshot = await window.firestore.getDocs(usersQuery);
+                    
+                    members = [];
+                    querySnapshot.forEach((doc) => {
+                        const userData = doc.data();
+                        if (userData.role !== 'admin') { // ไม่แสดงแอดมิน
+                            members.push({ id: doc.id, ...userData });
+                        }
+                    });
+                } else {
+                    // Demo data
+                    members = [
+                        {
+                            id: '1',
+                            name: 'นาย ทดสอบ ระบบ',
+                            email: 'test@example.com',
+                            organization: 'บริษัท ทดสอบ จำกัด',
+                            role: 'student',
+                            status: 'pending',
+                            createdAt: new Date().toISOString()
+                        },
+                        {
+                            id: '2',
+                            name: 'นางสาว ตัวอย่าง ข้อมูล',
+                            email: 'example@test.com',
+                            organization: 'หน่วยงานรัฐ',
+                            role: 'student',
+                            status: 'approved',
+                            createdAt: new Date(Date.now() - 86400000).toISOString()
+                        }
+                    ];
+                }
+                
+                updateMembersTable();
+                updatePendingAlert();
+                
+            } catch (error) {
+                console.error('Error loading members:', error);
+                showToast('เกิดข้อผิดพลาดในการโหลดข้อมูลสมาชิก', 'error');
+            }
+        }
+
+        function updateMembersTable() {
+            const tbody = document.getElementById('membersTableBody');
+            tbody.innerHTML = '';
+            
+            const filter = document.getElementById('memberStatusFilter').value;
+            const filteredMembers = filter === 'all' ? members : members.filter(m => m.status === filter);
+            
+            filteredMembers.forEach(member => {
+                const row = document.createElement('tr');
+                
+                let statusBadge = '';
+                switch (member.status) {
+                    case 'pending':
+                        statusBadge = '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">รอการอนุมัติ</span>';
+                        break;
+                    case 'approved':
+                        statusBadge = '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">อนุมัติแล้ว</span>';
+                        break;
+                    case 'rejected':
+                        statusBadge = '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">ปฏิเสธ</span>';
+                        break;
+                }
+                
+                let roleBadge = '';
+                switch (member.role) {
+                    case 'student':
+                        roleBadge = '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">นักเรียน</span>';
+                        break;
+                    case 'admin':
+                        roleBadge = '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">แอดมิน</span>';
+                        break;
+                }
+                
+                let actions = '';
+                if (member.status === 'pending') {
+                    actions = `
+                        <div class="flex gap-2">
+                            <button onclick="approveMember('${member.id}')" 
+                                    class="text-green-600 hover:text-green-800 text-sm font-medium">
+                                อนุมัติ
+                            </button>
+                            <button onclick="rejectMember('${member.id}')" 
+                                    class="text-red-600 hover:text-red-800 text-sm font-medium">
+                                ปฏิเสธ
+                            </button>
+                        </div>
+                    `;
+                } else if (member.status === 'approved') {
+                    actions = `
+                        <div class="flex gap-2">
+                            <select onchange="changeUserRole('${member.id}', this.value)" 
+                                    class="text-sm border border-gray-300 rounded px-2 py-1">
+                                <option value="student" ${member.role === 'student' ? 'selected' : ''}>นักเรียน</option>
+                                <option value="admin" ${member.role === 'admin' ? 'selected' : ''}>แอดมิน</option>
+                            </select>
+                            <button onclick="suspendMember('${member.id}')" 
+                                    class="text-orange-600 hover:text-orange-800 text-sm font-medium">
+                                ระงับ
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    actions = `
+                        <button onclick="approveMember('${member.id}')" 
+                                class="text-green-600 hover:text-green-800 text-sm font-medium">
+                            อนุมัติใหม่
+                        </button>
+                    `;
+                }
+                
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${member.name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${member.email}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${member.organization || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${roleBadge}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${statusBadge}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${new Date(member.createdAt).toLocaleDateString('th-TH')}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">${actions}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updatePendingAlert() {
+            const pendingMembers = members.filter(m => m.status === 'pending');
+            const alertDiv = document.getElementById('pendingAlert');
+            const countSpan = document.getElementById('pendingCount');
+            
+            if (pendingMembers.length > 0) {
+                countSpan.textContent = pendingMembers.length;
+                alertDiv.classList.remove('hidden');
+            } else {
+                alertDiv.classList.add('hidden');
+            }
+        }
+
+        function filterMembers() {
+            updateMembersTable();
+        }
+
+        async function approveMember(memberId) {
+            try {
+                if (window.db && window.firestore) {
+                    await window.firestore.setDoc(window.firestore.doc(window.db, 'users', memberId), {
+                        status: 'approved'
+                    }, { merge: true });
+                }
+                
+                // Update local data
+                const member = members.find(m => m.id === memberId);
+                if (member) {
+                    member.status = 'approved';
+                }
+                
+                updateMembersTable();
+                updatePendingAlert();
+                showToast('อนุมัติสมาชิกสำเร็จ', 'success');
+                
+            } catch (error) {
+                console.error('Error approving member:', error);
+                showToast('เกิดข้อผิดพลาดในการอนุมัติสมาชิก', 'error');
+            }
+        }
+
+        async function rejectMember(memberId) {
+            try {
+                if (window.db && window.firestore) {
+                    await window.firestore.setDoc(window.firestore.doc(window.db, 'users', memberId), {
+                        status: 'rejected'
+                    }, { merge: true });
+                }
+                
+                // Update local data
+                const member = members.find(m => m.id === memberId);
+                if (member) {
+                    member.status = 'rejected';
+                }
+                
+                updateMembersTable();
+                updatePendingAlert();
+                showToast('ปฏิเสธสมาชิกสำเร็จ', 'success');
+                
+            } catch (error) {
+                console.error('Error rejecting member:', error);
+                showToast('เกิดข้อผิดพลาดในการปฏิเสธสมาชิก', 'error');
+            }
+        }
+
+        async function changeUserRole(memberId, newRole) {
+            try {
+                if (window.db && window.firestore) {
+                    await window.firestore.setDoc(window.firestore.doc(window.db, 'users', memberId), {
+                        role: newRole
+                    }, { merge: true });
+                }
+                
+                // Update local data
+                const member = members.find(m => m.id === memberId);
+                if (member) {
+                    member.role = newRole;
+                }
+                
+                updateMembersTable();
+                showToast(`เปลี่ยนสิทธิ์เป็น${newRole === 'admin' ? 'แอดมิน' : 'นักเรียน'}สำเร็จ`, 'success');
+                
+            } catch (error) {
+                console.error('Error changing user role:', error);
+                showToast('เกิดข้อผิดพลาดในการเปลี่ยนสิทธิ์', 'error');
+            }
+        }
+
+        async function suspendMember(memberId) {
+            try {
+                if (window.db && window.firestore) {
+                    await window.firestore.setDoc(window.firestore.doc(window.db, 'users', memberId), {
+                        status: 'rejected'
+                    }, { merge: true });
+                }
+                
+                // Update local data
+                const member = members.find(m => m.id === memberId);
+                if (member) {
+                    member.status = 'rejected';
+                }
+                
+                updateMembersTable();
+                showToast('ระงับสมาชิกสำเร็จ', 'success');
+                
+            } catch (error) {
+                console.error('Error suspending member:', error);
+                showToast('เกิดข้อผิดพลาดในการระงับสมาชิก', 'error');
+            }
+        }
+
+        // File import functions
+        function downloadTemplate() {
+            const csvContent = 'คำถาม,ตัวเลือก A,ตัวเลือก B,ตัวเลือก C,ตัวเลือก D,คำตอบที่ถูก,หมวดหมู่,คำอธิบาย\n' +
+                              'ประเทศไทยมีกี่จังหวัด?,75 จังหวัด,76 จังหวัด,77 จังหวัด,78 จังหวัด,C,ภูมิศาสตร์,ประเทศไทยมี 77 จังหวัด\n' +
+                              '2 + 2 เท่ากับเท่าไร?,3,4,5,6,B,คณิตศาสตร์,การบวกพื้นฐาน';
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'exam_template.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showToast('ดาวน์โหลดแม่แบบสำเร็จ', 'success');
+        }
+
+        async function processImportFile() {
+            const fileInput = document.getElementById('examFileInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showToast('กรุณาเลือกไฟล์', 'error');
+                return;
+            }
+            
+            try {
+                let questions = [];
+                
+                if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
+                    questions = await parseCSV(file);
+                } else if (file.type.includes('sheet') || file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+                    questions = await parseExcel(file);
+                } else if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
+                    questions = await parsePDF(file);
+                } else {
+                    showToast('รูปแบบไฟล์ไม่รองรับ', 'error');
+                    return;
+                }
+                
+                if (questions.length === 0) {
+                    showToast('ไม่พบข้อสอบในไฟล์', 'error');
+                    return;
+                }
+                
+                importedQuestions = questions;
+                showImportPreview(questions);
+                
+            } catch (error) {
+                console.error('Error processing import file:', error);
+                showToast('เกิดข้อผิดพลาดในการประมวลผลไฟล์', 'error');
+            }
+        }
+
+        async function parseCSV(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const csv = e.target.result;
+                        const lines = csv.split('\n');
+                        const questions = [];
+                        
+                        // Skip header row
+                        for (let i = 1; i < lines.length; i++) {
+                            const line = lines[i].trim();
+                            if (!line) continue;
+                            
+                            const columns = parseCSVLine(line);
+                            if (columns.length >= 6) {
+                                const answerMap = { 'A': 0, 'B': 1, 'C': 2, 'D': 3 };
+                                const correctAnswer = answerMap[columns[5].toUpperCase()] ?? 0;
+                                
+                                questions.push({
+                                    questionText: columns[0],
+                                    options: [columns[1], columns[2], columns[3], columns[4]],
+                                    answer: correctAnswer,
+                                    category: columns[6] || 'ทั่วไป',
+                                    explanation: columns[7] || ''
+                                });
+                            }
+                        }
+                        resolve(questions);
+                    } catch (error) {
+                        reject(error);
+                    }
+                };
+                reader.readAsText(file, 'UTF-8');
+            });
+        }
+
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current.trim());
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            
+            result.push(current.trim());
+            return result;
+        }
+
+        async function parseExcel(file) {
+            // Simplified Excel parsing - in real implementation, you'd use a library like SheetJS
+            showToast('การนำเข้า Excel ยังไม่รองรับในเวอร์ชันนี้ กรุณาใช้ไฟล์ CSV', 'error');
+            return [];
+        }
+
+        async function parsePDF(file) {
+            // Simplified PDF parsing - in real implementation, you'd use PDF.js
+            showToast('การนำเข้า PDF ยังไม่รองรับในเวอร์ชันนี้ กรุณาใช้ไฟล์ CSV', 'error');
+            return [];
+        }
+
+        function showImportPreview(questions) {
+            const previewDiv = document.getElementById('importPreview');
+            const countSpan = document.getElementById('importCount');
+            const tbody = document.getElementById('importPreviewBody');
+            
+            countSpan.textContent = `${questions.length} ข้อ`;
+            tbody.innerHTML = '';
+            
+            // Show first 5 questions as preview
+            const previewQuestions = questions.slice(0, 5);
+            previewQuestions.forEach((question, index) => {
+                const row = document.createElement('tr');
+                const answerLetter = String.fromCharCode(65 + question.answer);
+                
+                row.innerHTML = `
+                    <td class="px-4 py-2 text-sm text-gray-900">${question.questionText.substring(0, 50)}${question.questionText.length > 50 ? '...' : ''}</td>
+                    <td class="px-4 py-2 text-sm text-gray-900">${question.options[0]}</td>
+                    <td class="px-4 py-2 text-sm text-gray-900">${question.options[1]}</td>
+                    <td class="px-4 py-2 text-sm text-gray-900">${question.options[2]}</td>
+                    <td class="px-4 py-2 text-sm text-gray-900">${question.options[3]}</td>
+                    <td class="px-4 py-2 text-sm font-medium text-green-600">${answerLetter}</td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            if (questions.length > 5) {
+                const moreRow = document.createElement('tr');
+                moreRow.innerHTML = `
+                    <td colspan="6" class="px-4 py-2 text-sm text-gray-500 text-center">
+                        และอีก ${questions.length - 5} ข้อ...
+                    </td>
+                `;
+                tbody.appendChild(moreRow);
+            }
+            
+            previewDiv.classList.remove('hidden');
+        }
+
+        async function confirmImport() {
+            try {
+                if (window.db && window.firestore) {
+                    for (const question of importedQuestions) {
+                        await window.firestore.addDoc(window.firestore.collection(window.db, 'questionBank'), question);
+                    }
+                }
+                
+                showToast(`นำเข้าข้อสอบ ${importedQuestions.length} ข้อสำเร็จ`, 'success');
+                cancelImport();
+                await loadQuestionsForAdmin();
+                
+            } catch (error) {
+                console.error('Error importing questions:', error);
+                showToast('เกิดข้อผิดพลาดในการนำเข้าข้อสอบ', 'error');
+            }
+        }
+
+        function cancelImport() {
+            document.getElementById('importPreview').classList.add('hidden');
+            document.getElementById('examFileInput').value = '';
+            importedQuestions = [];
+        }
+
         // Admin functions
         async function loadAdminData() {
             try {
@@ -1016,6 +1780,7 @@
                 updateAdminStats();
                 updateResultsTable();
                 await loadQuestionsForAdmin();
+                await loadMembers();
                 
             } catch (error) {
                 console.error('Error loading admin data:', error);
@@ -1368,9 +2133,12 @@
 
         // UI Helper functions
         function showScreen(screenName) {
-            const screens = ['login', 'exam', 'results', 'admin'];
+            const screens = ['login', 'register', 'pending', 'exam', 'results', 'admin'];
             screens.forEach(screen => {
-                document.getElementById(`${screen}Screen`).classList.add('hidden');
+                const screenElement = document.getElementById(`${screen}Screen`);
+                if (screenElement) {
+                    screenElement.classList.add('hidden');
+                }
             });
             document.getElementById(`${screenName}Screen`).classList.remove('hidden');
         }
@@ -1381,14 +2149,23 @@
 
         function showTab(tabName) {
             // Update tab buttons
-            document.getElementById('resultsTab').className = 'py-4 px-1 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700';
-            document.getElementById('questionsTab').className = 'py-4 px-1 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700';
+            const tabs = ['results', 'questions', 'members', 'import'];
+            tabs.forEach(tab => {
+                const tabElement = document.getElementById(`${tab}Tab`);
+                if (tabElement) {
+                    tabElement.className = 'py-4 px-1 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700';
+                }
+            });
             
             document.getElementById(`${tabName}Tab`).className = 'py-4 px-1 border-b-2 border-blue-500 font-medium text-blue-600';
             
             // Update tab content
-            document.getElementById('resultsTabContent').classList.add('hidden');
-            document.getElementById('questionsTabContent').classList.add('hidden');
+            tabs.forEach(tab => {
+                const contentElement = document.getElementById(`${tab}TabContent`);
+                if (contentElement) {
+                    contentElement.classList.add('hidden');
+                }
+            });
             
             document.getElementById(`${tabName}TabContent`).classList.remove('hidden');
         }
@@ -1449,6 +2226,9 @@
             // Login form
             document.getElementById('loginForm').addEventListener('submit', handleLogin);
             
+            // Register form
+            document.getElementById('registerForm').addEventListener('submit', handleRegister);
+            
             // Question form
             document.getElementById('questionForm').addEventListener('submit', addQuestion);
             
@@ -1461,5 +2241,5 @@
             });
         });
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99f44e6f25a04b94',t:'MTc2MzI2Nzk4Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99f45ca9901945c4',t:'MTc2MzI2ODU2OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
