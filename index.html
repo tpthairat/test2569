@@ -630,8 +630,9 @@
                 let isAdmin = false;
                 
                 if (window.useLocalStorage || !window.firebaseDb) {
-                    // Demo Mode - ตรวจสอบจาก role ใน user object
-                    isAdmin = user.role === 'admin';
+                    // Demo Mode - ตรวจสอบจาก email และ role
+                    isAdmin = user.email === 'admin@demo.com' || user.role === 'admin';
+                    console.log('Demo Mode - Checking admin:', user.email, user.role, 'isAdmin:', isAdmin);
                 } else {
                     // Firebase Mode
                     const userDoc = await window.getDoc(window.doc(window.firebaseDb, 'users', user.uid));
@@ -641,6 +642,7 @@
                 
                 if (isAdmin) {
                     // แสดง Dashboard สำหรับ admin
+                    showToast('เข้าสู่ระบบแอดมินสำเร็จ!', 'success');
                     await loadDashboardData();
                     showScreen('dashboardScreen');
                     return;
@@ -1316,12 +1318,21 @@
                 startTime: examStartTime,
                 endTime: examEndTime,
                 device: navigator.userAgent,
-                submittedAt: window.serverTimestamp()
+                submittedAt: new Date().toISOString()
             };
             
-            // บันทึกลง Firebase
+            // บันทึกผลสอบ
             try {
-                await window.setDoc(window.doc(window.firebaseDb, 'examResults', currentUser.uid), examData);
+                if (window.useLocalStorage || !window.firebaseDb) {
+                    // Demo Mode - บันทึกลง localStorage
+                    const examResults = JSON.parse(localStorage.getItem('demoExamResults') || '{}');
+                    examResults[currentUser.uid] = examData;
+                    localStorage.setItem('demoExamResults', JSON.stringify(examResults));
+                } else {
+                    // Firebase Mode
+                    await window.setDoc(window.doc(window.firebaseDb, 'examResults', currentUser.uid), examData);
+                }
+                
                 showToast('บันทึกผลการสอบสำเร็จ!', 'success');
                 
                 // ลบข้อมูลการสอบที่บันทึกไว้
@@ -1401,13 +1412,23 @@
             showToast('กำลังโหลดข้อมูล...', 'info');
             
             try {
-                const q = window.query(window.collection(window.firebaseDb, 'examResults'), window.orderBy('submittedAt', 'desc'));
-                const querySnapshot = await window.getDocs(q);
-                
-                allExamResults = [];
-                querySnapshot.forEach((doc) => {
-                    allExamResults.push({ id: doc.id, ...doc.data() });
-                });
+                if (window.useLocalStorage || !window.firebaseDb) {
+                    // Demo Mode - โหลดจาก localStorage
+                    const examResults = JSON.parse(localStorage.getItem('demoExamResults') || '{}');
+                    allExamResults = Object.values(examResults).map((result, index) => ({
+                        id: result.uid || 'demo_' + index,
+                        ...result
+                    }));
+                } else {
+                    // Firebase Mode
+                    const q = window.query(window.collection(window.firebaseDb, 'examResults'), window.orderBy('submittedAt', 'desc'));
+                    const querySnapshot = await window.getDocs(q);
+                    
+                    allExamResults = [];
+                    querySnapshot.forEach((doc) => {
+                        allExamResults.push({ id: doc.id, ...doc.data() });
+                    });
+                }
                 
                 updateDashboardStats();
                 displayResults(allExamResults);
@@ -1415,6 +1436,10 @@
             } catch (error) {
                 console.error('Error loading dashboard data:', error);
                 showToast('เกิดข้อผิดพลาดในการโหลดข้อมูล', 'error');
+                // แสดงข้อมูลเปล่าแทน
+                allExamResults = [];
+                updateDashboardStats();
+                displayResults(allExamResults);
             }
         }
 
@@ -1447,7 +1472,7 @@
             noResults.classList.add('hidden');
             
             tbody.innerHTML = results.map((result, index) => {
-                const date = result.submittedAt ? new Date(result.submittedAt.seconds * 1000) : new Date();
+                const date = result.submittedAt ? new Date(result.submittedAt) : new Date();
                 const status = result.score >= 60 ? 'ผ่าน' : 'ไม่ผ่าน';
                 const statusClass = result.score >= 60 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
                 
@@ -1515,8 +1540,8 @@
                 case 'date':
                 default:
                     sortedResults.sort((a, b) => {
-                        const dateA = a.submittedAt ? a.submittedAt.seconds : 0;
-                        const dateB = b.submittedAt ? b.submittedAt.seconds : 0;
+                        const dateA = new Date(a.submittedAt || 0).getTime();
+                        const dateB = new Date(b.submittedAt || 0).getTime();
                         return dateB - dateA;
                     });
                     break;
@@ -1537,7 +1562,7 @@
             const csvContent = [
                 headers.join(','),
                 ...allExamResults.map((result, index) => {
-                    const date = result.submittedAt ? new Date(result.submittedAt.seconds * 1000) : new Date();
+                    const date = result.submittedAt ? new Date(result.submittedAt) : new Date();
                     const status = result.score >= 60 ? 'ผ่าน' : 'ไม่ผ่าน';
                     
                     return [
@@ -1645,16 +1670,31 @@
             showToast('กำลังบันทึกข้อสอบ...', 'info');
             
             try {
-                await window.addDoc(window.collection(window.firebaseDb, 'questions'), {
+                const newQuestion = {
+                    id: 'demo_' + Date.now(),
                     question: questionText,
                     options: [option1, option2, option3, option4],
                     correct: correctAnswer,
-                    createdAt: window.serverTimestamp()
-                });
+                    createdAt: new Date().toISOString()
+                };
+                
+                if (window.useLocalStorage || !window.firebaseDb) {
+                    // Demo Mode - บันทึกลง localStorage
+                    examQuestions.push(newQuestion);
+                    localStorage.setItem('demoQuestions', JSON.stringify(examQuestions));
+                } else {
+                    // Firebase Mode
+                    await window.addDoc(window.collection(window.firebaseDb, 'questions'), {
+                        question: questionText,
+                        options: [option1, option2, option3, option4],
+                        correct: correctAnswer,
+                        createdAt: window.serverTimestamp()
+                    });
+                    await loadQuestionsFromFirebase();
+                }
                 
                 showToast('เพิ่มข้อสอบสำเร็จ!', 'success');
                 hideAddQuestionForm();
-                await loadQuestionsFromFirebase();
                 displayQuestionsList();
                 
             } catch (error) {
@@ -1758,16 +1798,32 @@
             showToast('กำลังบันทึกการแก้ไข...', 'info');
             
             try {
-                await window.setDoc(window.doc(window.firebaseDb, 'questions', questionId), {
-                    question: questionText,
-                    options: [option1, option2, option3, option4],
-                    correct: correctAnswer,
-                    updatedAt: window.serverTimestamp()
-                }, { merge: true });
+                if (window.useLocalStorage || !window.firebaseDb) {
+                    // Demo Mode - แก้ไขใน localStorage
+                    const questionIndex = examQuestions.findIndex(q => q.id === questionId);
+                    if (questionIndex !== -1) {
+                        examQuestions[questionIndex] = {
+                            ...examQuestions[questionIndex],
+                            question: questionText,
+                            options: [option1, option2, option3, option4],
+                            correct: correctAnswer,
+                            updatedAt: new Date().toISOString()
+                        };
+                        localStorage.setItem('demoQuestions', JSON.stringify(examQuestions));
+                    }
+                } else {
+                    // Firebase Mode
+                    await window.setDoc(window.doc(window.firebaseDb, 'questions', questionId), {
+                        question: questionText,
+                        options: [option1, option2, option3, option4],
+                        correct: correctAnswer,
+                        updatedAt: window.serverTimestamp()
+                    }, { merge: true });
+                    await loadQuestionsFromFirebase();
+                }
                 
                 showToast('แก้ไขข้อสอบสำเร็จ!', 'success');
                 hideEditQuestionModal();
-                await loadQuestionsFromFirebase();
                 displayQuestionsList();
                 
             } catch (error) {
@@ -1795,11 +1851,18 @@
             showToast('กำลังลบข้อสอบ...', 'info');
             
             try {
-                await window.deleteDoc(window.doc(window.firebaseDb, 'questions', questionToDelete));
+                if (window.useLocalStorage || !window.firebaseDb) {
+                    // Demo Mode - ลบจาก localStorage
+                    examQuestions = examQuestions.filter(q => q.id !== questionToDelete);
+                    localStorage.setItem('demoQuestions', JSON.stringify(examQuestions));
+                } else {
+                    // Firebase Mode
+                    await window.deleteDoc(window.doc(window.firebaseDb, 'questions', questionToDelete));
+                    await loadQuestionsFromFirebase();
+                }
                 
                 showToast('ลบข้อสอบสำเร็จ!', 'success');
                 hideDeleteConfirmModal();
-                await loadQuestionsFromFirebase();
                 displayQuestionsList();
                 
             } catch (error) {
@@ -1814,5 +1877,5 @@
             document.getElementById('email').focus();
         });
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99f3c036b1a14ba0',t:'MTc2MzI2MjE2MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99f3ef85b53445ba',t:'MTc2MzI2NDA5OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
