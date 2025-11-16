@@ -273,7 +273,7 @@
      <div id="membersTabContent" class="p-6 hidden">
       <div class="flex justify-between items-center mb-6">
        <h3 class="text-lg font-medium">จัดการสมาชิก</h3>
-       <div class="flex gap-2"><select id="memberStatusFilter" onchange="filterMembers()" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"> <option value="all">ทั้งหมด</option> <option value="pending">รอการอนุมัติ</option> <option value="approved">อนุมัติแล้ว</option> <option value="rejected">ปฏิเสธ</option> </select>
+       <div class="flex gap-2"><select id="memberStatusFilter" onchange="filterMembers()" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"> <option value="all">ทั้งหมด</option> <option value="pending">รอการอนุมัติ</option> <option value="approved">อนุมัติแล้ว</option> <option value="rejected">ปฏิเสธ</option> </select> <button onclick="loadMembers()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200"> รีเฟรช </button>
        </div>
       </div><!-- Pending Approvals Alert -->
       <div id="pendingAlert" class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6 hidden">
@@ -283,8 +283,19 @@
          <p class="text-sm text-yellow-700">มีสมาชิก <span id="pendingCount">0</span> คนรอการอนุมัติจากคุณ</p>
         </div>
        </div>
+      </div><!-- Loading State -->
+      <div id="membersLoading" class="text-center py-8 hidden">
+       <div class="loading-spinner mx-auto mb-4"></div>
+       <p class="text-gray-600">กำลังโหลดข้อมูลสมาชิก...</p>
+      </div><!-- Empty State -->
+      <div id="membersEmpty" class="text-center py-8 hidden">
+       <div class="text-6xl mb-4">
+        👥
+       </div>
+       <h3 class="text-lg font-medium text-gray-900 mb-2">ยังไม่มีสมาชิก</h3>
+       <p class="text-gray-600">เมื่อมีผู้ใช้สมัครสมาชิก จะแสดงรายชื่อที่นี่</p>
       </div>
-      <div class="overflow-x-auto">
+      <div class="overflow-x-auto" id="membersTable">
        <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
          <tr>
@@ -340,20 +351,38 @@
        </div><!-- Import Instructions -->
        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
         <h4 class="text-md font-medium text-blue-800 mb-3">คำแนะนำการนำเข้าข้อสอบ</h4>
-        <div class="text-sm text-blue-700 space-y-2">
-         <p><strong>รูปแบบ CSV:</strong> ไฟล์ต้องมีคอลัมน์ดังนี้</p>
-         <ul class="list-disc list-inside ml-4 space-y-1">
-          <li>คำถาม (Question)</li>
-          <li>ตัวเลือก A (Option A)</li>
-          <li>ตัวเลือก B (Option B)</li>
-          <li>ตัวเลือก C (Option C)</li>
-          <li>ตัวเลือก D (Option D)</li>
-          <li>คำตอบที่ถูก (Correct Answer: A, B, C, หรือ D)</li>
-          <li>หมวดหมู่ (Category - ไม่บังคับ)</li>
-          <li>คำอธิบาย (Explanation - ไม่บังคับ)</li>
-         </ul>
-         <p><strong>รูปแบบ Excel:</strong> ใช้รูปแบบเดียวกับ CSV</p>
-         <p><strong>รูปแบบ PDF:</strong> ระบบจะพยายามแยกข้อความและแปลงเป็นข้อสอบ (อาจต้องตรวจสอบความถูกต้อง)</p>
+        <div class="text-sm text-blue-700 space-y-3">
+         <div>
+          <p class="font-medium mb-2">📋 <strong>รูปแบบ CSV ที่รองรับ:</strong></p>
+          <ul class="list-disc list-inside ml-4 space-y-1">
+           <li><strong>คำถาม</strong> - ข้อความคำถาม (บังคับ)</li>
+           <li><strong>ตัวเลือก A</strong> - ตัวเลือกที่ 1 (บังคับ)</li>
+           <li><strong>ตัวเลือก B</strong> - ตัวเลือกที่ 2 (บังคับ)</li>
+           <li><strong>ตัวเลือก C</strong> - ตัวเลือกที่ 3 (บังคับ)</li>
+           <li><strong>ตัวเลือก D</strong> - ตัวเลือกที่ 4 (บังคับ)</li>
+           <li><strong>คำตอบที่ถูก</strong> - A, B, C, D หรือ 1, 2, 3, 4 (บังคับ)</li>
+           <li><strong>หมวดหมู่</strong> - หมวดหมู่ของข้อสอบ (ไม่บังคับ)</li>
+           <li><strong>คำอธิบาย</strong> - เฉลยหรือคำอธิบาย (ไม่บังคับ)</li>
+          </ul>
+         </div>
+         <div class="bg-white border border-blue-200 rounded p-3">
+          <p class="font-medium text-blue-800 mb-2">💡 <strong>เทคนิคการใช้งาน:</strong></p>
+          <ul class="list-disc list-inside space-y-1 text-xs">
+           <li>ใช้เครื่องหมาย " " ครอบข้อความที่มีเครื่องหมายจุลภาค</li>
+           <li>บันทึกไฟล์เป็น UTF-8 encoding เพื่อรองรับภาษาไทย</li>
+           <li>ตรวจสอบให้แน่ใจว่าทุกแถวมีข้อมูลครบ 6 คอลัมน์</li>
+           <li>คำตอบที่ถูกสามารถใช้ A-D หรือ 1-4 ก็ได้</li>
+           <li>ดาวน์โหลดแม่แบบเพื่อดูตัวอย่างที่ถูกต้อง</li>
+          </ul>
+         </div>
+         <div class="bg-yellow-50 border border-yellow-200 rounded p-3">
+          <p class="font-medium text-yellow-800 mb-1">⚠️ <strong>ข้อควรระวัง:</strong></p>
+          <ul class="list-disc list-inside space-y-1 text-xs text-yellow-700">
+           <li>Excel และ PDF ยังไม่รองรับในเวอร์ชันนี้</li>
+           <li>ระบบจะข้ามแถวที่ข้อมูลไม่ครบหรือไม่ถูกต้อง</li>
+           <li>ตรวจสอบตัวอย่างก่อนยืนยันการนำเข้า</li>
+          </ul>
+         </div>
         </div>
        </div>
       </div>
@@ -465,7 +494,7 @@
      <div id="membersTabContent" class="p-6 hidden">
       <div class="flex justify-between items-center mb-6">
        <h3 class="text-lg font-medium">จัดการสมาชิก</h3>
-       <div class="flex gap-2"><select id="memberStatusFilter" onchange="filterMembers()" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"> <option value="all">ทั้งหมด</option> <option value="pending">รอการอนุมัติ</option> <option value="approved">อนุมัติแล้ว</option> <option value="rejected">ปฏิเสธ</option> </select>
+       <div class="flex gap-2"><select id="memberStatusFilter" onchange="filterMembers()" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"> <option value="all">ทั้งหมด</option> <option value="pending">รอการอนุมัติ</option> <option value="approved">อนุมัติแล้ว</option> <option value="rejected">ปฏิเสธ</option> </select> <button onclick="loadMembers()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200"> รีเฟรช </button>
        </div>
       </div><!-- Pending Approvals Alert -->
       <div id="pendingAlert" class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6 hidden">
@@ -475,8 +504,19 @@
          <p class="text-sm text-yellow-700">มีสมาชิก <span id="pendingCount">0</span> คนรอการอนุมัติจากคุณ</p>
         </div>
        </div>
+      </div><!-- Loading State -->
+      <div id="membersLoading" class="text-center py-8 hidden">
+       <div class="loading-spinner mx-auto mb-4"></div>
+       <p class="text-gray-600">กำลังโหลดข้อมูลสมาชิก...</p>
+      </div><!-- Empty State -->
+      <div id="membersEmpty" class="text-center py-8 hidden">
+       <div class="text-6xl mb-4">
+        👥
+       </div>
+       <h3 class="text-lg font-medium text-gray-900 mb-2">ยังไม่มีสมาชิก</h3>
+       <p class="text-gray-600">เมื่อมีผู้ใช้สมัครสมาชิก จะแสดงรายชื่อที่นี่</p>
       </div>
-      <div class="overflow-x-auto">
+      <div class="overflow-x-auto" id="membersTable">
        <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
          <tr>
@@ -532,20 +572,38 @@
        </div><!-- Import Instructions -->
        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
         <h4 class="text-md font-medium text-blue-800 mb-3">คำแนะนำการนำเข้าข้อสอบ</h4>
-        <div class="text-sm text-blue-700 space-y-2">
-         <p><strong>รูปแบบ CSV:</strong> ไฟล์ต้องมีคอลัมน์ดังนี้</p>
-         <ul class="list-disc list-inside ml-4 space-y-1">
-          <li>คำถาม (Question)</li>
-          <li>ตัวเลือก A (Option A)</li>
-          <li>ตัวเลือก B (Option B)</li>
-          <li>ตัวเลือก C (Option C)</li>
-          <li>ตัวเลือก D (Option D)</li>
-          <li>คำตอบที่ถูก (Correct Answer: A, B, C, หรือ D)</li>
-          <li>หมวดหมู่ (Category - ไม่บังคับ)</li>
-          <li>คำอธิบาย (Explanation - ไม่บังคับ)</li>
-         </ul>
-         <p><strong>รูปแบบ Excel:</strong> ใช้รูปแบบเดียวกับ CSV</p>
-         <p><strong>รูปแบบ PDF:</strong> ระบบจะพยายามแยกข้อความและแปลงเป็นข้อสอบ (อาจต้องตรวจสอบความถูกต้อง)</p>
+        <div class="text-sm text-blue-700 space-y-3">
+         <div>
+          <p class="font-medium mb-2">📋 <strong>รูปแบบ CSV ที่รองรับ:</strong></p>
+          <ul class="list-disc list-inside ml-4 space-y-1">
+           <li><strong>คำถาม</strong> - ข้อความคำถาม (บังคับ)</li>
+           <li><strong>ตัวเลือก A</strong> - ตัวเลือกที่ 1 (บังคับ)</li>
+           <li><strong>ตัวเลือก B</strong> - ตัวเลือกที่ 2 (บังคับ)</li>
+           <li><strong>ตัวเลือก C</strong> - ตัวเลือกที่ 3 (บังคับ)</li>
+           <li><strong>ตัวเลือก D</strong> - ตัวเลือกที่ 4 (บังคับ)</li>
+           <li><strong>คำตอบที่ถูก</strong> - A, B, C, D หรือ 1, 2, 3, 4 (บังคับ)</li>
+           <li><strong>หมวดหมู่</strong> - หมวดหมู่ของข้อสอบ (ไม่บังคับ)</li>
+           <li><strong>คำอธิบาย</strong> - เฉลยหรือคำอธิบาย (ไม่บังคับ)</li>
+          </ul>
+         </div>
+         <div class="bg-white border border-blue-200 rounded p-3">
+          <p class="font-medium text-blue-800 mb-2">💡 <strong>เทคนิคการใช้งาน:</strong></p>
+          <ul class="list-disc list-inside space-y-1 text-xs">
+           <li>ใช้เครื่องหมาย " " ครอบข้อความที่มีเครื่องหมายจุลภาค</li>
+           <li>บันทึกไฟล์เป็น UTF-8 encoding เพื่อรองรับภาษาไทย</li>
+           <li>ตรวจสอบให้แน่ใจว่าทุกแถวมีข้อมูลครบ 6 คอลัมน์</li>
+           <li>คำตอบที่ถูกสามารถใช้ A-D หรือ 1-4 ก็ได้</li>
+           <li>ดาวน์โหลดแม่แบบเพื่อดูตัวอย่างที่ถูกต้อง</li>
+          </ul>
+         </div>
+         <div class="bg-yellow-50 border border-yellow-200 rounded p-3">
+          <p class="font-medium text-yellow-800 mb-1">⚠️ <strong>ข้อควรระวัง:</strong></p>
+          <ul class="list-disc list-inside space-y-1 text-xs text-yellow-700">
+           <li>Excel และ PDF ยังไม่รองรับในเวอร์ชันนี้</li>
+           <li>ระบบจะข้ามแถวที่ข้อมูลไม่ครบหรือไม่ถูกต้อง</li>
+           <li>ตรวจสอบตัวอย่างก่อนยืนยันการนำเข้า</li>
+          </ul>
+         </div>
         </div>
        </div>
       </div>
@@ -1313,6 +1371,11 @@
 
         // Member management functions
         async function loadMembers() {
+            // Show loading state
+            document.getElementById('membersLoading').classList.remove('hidden');
+            document.getElementById('membersTable').classList.add('hidden');
+            document.getElementById('membersEmpty').classList.add('hidden');
+            
             try {
                 if (window.db && window.firestore) {
                     const usersQuery = window.firestore.query(
@@ -1329,12 +1392,13 @@
                         }
                     });
                 } else {
-                    // Demo data
+                    // Demo data - เพิ่มข้อมูลตัวอย่างมากขึ้น
                     members = [
                         {
                             id: '1',
                             name: 'นาย ทดสอบ ระบบ',
                             email: 'test@example.com',
+                            phone: '081-234-5678',
                             organization: 'บริษัท ทดสอบ จำกัด',
                             role: 'student',
                             status: 'pending',
@@ -1344,19 +1408,60 @@
                             id: '2',
                             name: 'นางสาว ตัวอย่าง ข้อมูล',
                             email: 'example@test.com',
+                            phone: '082-345-6789',
                             organization: 'หน่วยงานรัฐ',
                             role: 'student',
                             status: 'approved',
                             createdAt: new Date(Date.now() - 86400000).toISOString()
+                        },
+                        {
+                            id: '3',
+                            name: 'นาย สมชาย ใจดี',
+                            email: 'somchai@company.com',
+                            phone: '083-456-7890',
+                            organization: 'บริษัท ABC จำกัด',
+                            role: 'student',
+                            status: 'pending',
+                            createdAt: new Date(Date.now() - 3600000).toISOString()
+                        },
+                        {
+                            id: '4',
+                            name: 'นางสาว สมหญิง รักเรียน',
+                            email: 'somying@school.ac.th',
+                            phone: '084-567-8901',
+                            organization: 'โรงเรียนมัธยม ABC',
+                            role: 'admin',
+                            status: 'approved',
+                            createdAt: new Date(Date.now() - 172800000).toISOString()
+                        },
+                        {
+                            id: '5',
+                            name: 'นาย ปิติ สนใจ',
+                            email: 'piti@university.ac.th',
+                            phone: '085-678-9012',
+                            organization: 'มหาวิทยาลัย XYZ',
+                            role: 'student',
+                            status: 'rejected',
+                            createdAt: new Date(Date.now() - 259200000).toISOString()
                         }
                     ];
                 }
                 
-                updateMembersTable();
-                updatePendingAlert();
+                // Hide loading state
+                document.getElementById('membersLoading').classList.add('hidden');
+                
+                if (members.length === 0) {
+                    document.getElementById('membersEmpty').classList.remove('hidden');
+                } else {
+                    document.getElementById('membersTable').classList.remove('hidden');
+                    updateMembersTable();
+                    updatePendingAlert();
+                }
                 
             } catch (error) {
                 console.error('Error loading members:', error);
+                document.getElementById('membersLoading').classList.add('hidden');
+                document.getElementById('membersEmpty').classList.remove('hidden');
                 showToast('เกิดข้อผิดพลาดในการโหลดข้อมูลสมาชิก', 'error');
             }
         }
@@ -1557,9 +1662,14 @@
 
         // File import functions
         function downloadTemplate() {
-            const csvContent = 'คำถาม,ตัวเลือก A,ตัวเลือก B,ตัวเลือก C,ตัวเลือก D,คำตอบที่ถูก,หมวดหมู่,คำอธิบาย\n' +
-                              'ประเทศไทยมีกี่จังหวัด?,75 จังหวัด,76 จังหวัด,77 จังหวัด,78 จังหวัด,C,ภูมิศาสตร์,ประเทศไทยมี 77 จังหวัด\n' +
-                              '2 + 2 เท่ากับเท่าไร?,3,4,5,6,B,คณิตศาสตร์,การบวกพื้นฐาน';
+            // Create comprehensive CSV template with BOM for proper UTF-8 encoding
+            const csvContent = '\uFEFF' + // BOM for UTF-8
+                'คำถาม,ตัวเลือก A,ตัวเลือก B,ตัวเลือก C,ตัวเลือก D,คำตอบที่ถูก,หมวดหมู่,คำอธิบาย\n' +
+                '"ประเทศไทยมีกี่จังหวัด?","75 จังหวัด","76 จังหวัด","77 จังหวัด","78 จังหวัด","C","ภูมิศาสตร์","ประเทศไทยมี 77 จังหวัด"\n' +
+                '"2 + 2 เท่ากับเท่าไร?","3","4","5","6","B","คณิตศาสตร์","การบวกพื้นฐาน 2+2=4"\n' +
+                '"เมืองหลวงของประเทศไทยคือ?","เชียงใหม่","กรุงเทพมหานคร","ขอนแก่น","หาดใหญ่","B","ภูมิศาสตร์","กรุงเทพมหานครเป็นเมืองหลวงของไทย"\n' +
+                '"น้ำเดือดที่อุณหภูมิกี่องศาเซลเซียส?","90°C","95°C","100°C","105°C","C","วิทยาศาสตร์","น้ำเดือดที่ 100 องศาเซลเซียสที่ระดับน้ำทะเล"\n' +
+                '"10 × 5 เท่ากับเท่าไร?","45","50","55","60","B","คณิตศาสตร์","10 คูณ 5 เท่ากับ 50"';
             
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
@@ -1571,7 +1681,7 @@
             link.click();
             document.body.removeChild(link);
             
-            showToast('ดาวน์โหลดแม่แบบสำเร็จ', 'success');
+            showToast('ดาวน์โหลดแม่แบบ CSV สำเร็จ', 'success');
         }
 
         async function processImportFile() {
@@ -1579,35 +1689,73 @@
             const file = fileInput.files[0];
             
             if (!file) {
-                showToast('กรุณาเลือกไฟล์', 'error');
+                // แสดงตัวอย่างข้อมูลสำหรับ Demo
+                const demoQuestions = [
+                    {
+                        questionText: "ประเทศไทยตั้งอยู่ในทวีปใด?",
+                        options: ["เอเชีย", "ยุโรป", "อเมริกา", "แอฟริกา"],
+                        answer: 0,
+                        category: "ภูมิศาสตร์",
+                        explanation: "ประเทศไทยตั้งอยู่ในทวีปเอเชีย เอเชียตะวันออกเฉียงใต้"
+                    },
+                    {
+                        questionText: "สีของธงชาติไทยประกอบด้วยสีใดบ้าง?",
+                        options: ["แดง ขาว น้ำเงิน", "แดง เหลือง เขียว", "น้ำเงิน ขาว แดง", "เหลือง เขียว น้ำเงิน"],
+                        answer: 0,
+                        category: "ประวัติศาสตร์",
+                        explanation: "ธงชาติไทยมีสีแดง ขาว น้ำเงิน เรียกว่า ธงไตรรงค์"
+                    },
+                    {
+                        questionText: "9 × 7 เท่ากับเท่าไร?",
+                        options: ["56", "63", "72", "81"],
+                        answer: 1,
+                        category: "คณิตศาสตร์",
+                        explanation: "9 × 7 = 63"
+                    }
+                ];
+                
+                importedQuestions = demoQuestions;
+                showImportPreview(demoQuestions);
+                showToast('แสดงตัวอย่างข้อสอบสำหรับ Demo', 'info');
                 return;
             }
+            
+            // Show loading state
+            const importBtn = event.target;
+            const originalText = importBtn.textContent;
+            importBtn.innerHTML = '<div class="loading-spinner mx-auto"></div>';
+            importBtn.disabled = true;
             
             try {
                 let questions = [];
                 
                 if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
+                    showToast('กำลังประมวลผลไฟล์ CSV...', 'info');
                     questions = await parseCSV(file);
                 } else if (file.type.includes('sheet') || file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
                     questions = await parseExcel(file);
                 } else if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
                     questions = await parsePDF(file);
                 } else {
-                    showToast('รูปแบบไฟล์ไม่รองรับ', 'error');
+                    showToast('รูปแบบไฟล์ไม่รองรับ กรุณาใช้ไฟล์ CSV', 'error');
                     return;
                 }
                 
                 if (questions.length === 0) {
-                    showToast('ไม่พบข้อสอบในไฟล์', 'error');
+                    showToast('ไม่พบข้อสอบในไฟล์ หรือรูปแบบไฟล์ไม่ถูกต้อง', 'error');
                     return;
                 }
                 
                 importedQuestions = questions;
                 showImportPreview(questions);
+                showToast(`พบข้อสอบ ${questions.length} ข้อ กรุณาตรวจสอบและยืนยัน`, 'success');
                 
             } catch (error) {
                 console.error('Error processing import file:', error);
-                showToast('เกิดข้อผิดพลาดในการประมวลผลไฟล์', 'error');
+                showToast(`เกิดข้อผิดพลาด: ${error.message}`, 'error');
+            } finally {
+                importBtn.textContent = originalText;
+                importBtn.disabled = false;
             }
         }
 
@@ -1619,31 +1767,105 @@
                         const csv = e.target.result;
                         const lines = csv.split('\n');
                         const questions = [];
+                        let headerFound = false;
+                        let headerIndex = 0;
                         
-                        // Skip header row
-                        for (let i = 1; i < lines.length; i++) {
-                            const line = lines[i].trim();
-                            if (!line) continue;
-                            
-                            const columns = parseCSVLine(line);
-                            if (columns.length >= 6) {
-                                const answerMap = { 'A': 0, 'B': 1, 'C': 2, 'D': 3 };
-                                const correctAnswer = answerMap[columns[5].toUpperCase()] ?? 0;
-                                
-                                questions.push({
-                                    questionText: columns[0],
-                                    options: [columns[1], columns[2], columns[3], columns[4]],
-                                    answer: correctAnswer,
-                                    category: columns[6] || 'ทั่วไป',
-                                    explanation: columns[7] || ''
-                                });
+                        // Find header row (look for common patterns)
+                        for (let i = 0; i < Math.min(5, lines.length); i++) {
+                            const line = lines[i].trim().toLowerCase();
+                            if (line.includes('คำถาม') || line.includes('question') || 
+                                line.includes('ข้อ') || line.includes('โจทย์')) {
+                                headerFound = true;
+                                headerIndex = i;
+                                break;
                             }
                         }
-                        resolve(questions);
+                        
+                        // Start processing from after header (or from line 1 if no header found)
+                        const startIndex = headerFound ? headerIndex + 1 : (lines[0].includes('คำถาม') ? 1 : 0);
+                        
+                        for (let i = startIndex; i < lines.length; i++) {
+                            const line = lines[i].trim();
+                            if (!line || line.length < 10) continue; // Skip empty or very short lines
+                            
+                            try {
+                                const columns = parseCSVLine(line);
+                                
+                                // Validate minimum required columns
+                                if (columns.length < 6) {
+                                    console.warn(`บรรทัดที่ ${i + 1}: ข้อมูลไม่ครบ (ต้องการอย่างน้อย 6 คอลัมน์)`);
+                                    continue;
+                                }
+                                
+                                // Clean and validate question text
+                                const questionText = columns[0].trim();
+                                if (!questionText || questionText.length < 5) {
+                                    console.warn(`บรรทัดที่ ${i + 1}: คำถามไม่ถูกต้องหรือสั้นเกินไป`);
+                                    continue;
+                                }
+                                
+                                // Clean and validate options
+                                const options = [
+                                    columns[1].trim(),
+                                    columns[2].trim(), 
+                                    columns[3].trim(),
+                                    columns[4].trim()
+                                ];
+                                
+                                // Check if all options are provided
+                                if (options.some(opt => !opt || opt.length < 1)) {
+                                    console.warn(`บรรทัดที่ ${i + 1}: ตัวเลือกไม่ครบหรือว่างเปล่า`);
+                                    continue;
+                                }
+                                
+                                // Parse correct answer
+                                const answerText = columns[5].trim().toUpperCase();
+                                let correctAnswer = 0;
+                                
+                                if (answerText === 'A' || answerText === '1') correctAnswer = 0;
+                                else if (answerText === 'B' || answerText === '2') correctAnswer = 1;
+                                else if (answerText === 'C' || answerText === '3') correctAnswer = 2;
+                                else if (answerText === 'D' || answerText === '4') correctAnswer = 3;
+                                else {
+                                    console.warn(`บรรทัดที่ ${i + 1}: คำตอบไม่ถูกต้อง (ต้องเป็น A, B, C, D หรือ 1, 2, 3, 4)`);
+                                    continue;
+                                }
+                                
+                                // Extract category and explanation (optional)
+                                const category = columns[6] ? columns[6].trim() : 'ทั่วไป';
+                                const explanation = columns[7] ? columns[7].trim() : '';
+                                
+                                questions.push({
+                                    questionText: questionText,
+                                    options: options,
+                                    answer: correctAnswer,
+                                    category: category,
+                                    explanation: explanation
+                                });
+                                
+                            } catch (lineError) {
+                                console.warn(`บรรทัดที่ ${i + 1}: เกิดข้อผิดพลาดในการประมวลผล - ${lineError.message}`);
+                                continue;
+                            }
+                        }
+                        
+                        if (questions.length === 0) {
+                            reject(new Error('ไม่พบข้อสอบที่ถูกต้องในไฟล์ กรุณาตรวจสอบรูปแบบไฟล์'));
+                        } else {
+                            console.log(`นำเข้าข้อสอบสำเร็จ ${questions.length} ข้อ`);
+                            resolve(questions);
+                        }
+                        
                     } catch (error) {
-                        reject(error);
+                        reject(new Error(`เกิดข้อผิดพลาดในการอ่านไฟล์: ${error.message}`));
                     }
                 };
+                
+                reader.onerror = function() {
+                    reject(new Error('ไม่สามารถอ่านไฟล์ได้'));
+                };
+                
+                // Try different encodings
                 reader.readAsText(file, 'UTF-8');
             });
         }
@@ -1652,22 +1874,44 @@
             const result = [];
             let current = '';
             let inQuotes = false;
+            let i = 0;
             
-            for (let i = 0; i < line.length; i++) {
+            while (i < line.length) {
                 const char = line[i];
                 
                 if (char === '"') {
-                    inQuotes = !inQuotes;
+                    if (inQuotes && i + 1 < line.length && line[i + 1] === '"') {
+                        // Handle escaped quotes ("")
+                        current += '"';
+                        i += 2;
+                    } else {
+                        // Toggle quote state
+                        inQuotes = !inQuotes;
+                        i++;
+                    }
                 } else if (char === ',' && !inQuotes) {
-                    result.push(current.trim());
+                    // Field separator found outside quotes
+                    result.push(current.trim().replace(/^"|"$/g, '')); // Remove surrounding quotes
                     current = '';
+                    i++;
                 } else {
                     current += char;
+                    i++;
                 }
             }
             
-            result.push(current.trim());
-            return result;
+            // Add the last field
+            result.push(current.trim().replace(/^"|"$/g, ''));
+            
+            // Clean up empty fields and ensure we have at least 6 fields
+            const cleanResult = result.map(field => field.trim());
+            
+            // Pad with empty strings if needed
+            while (cleanResult.length < 8) {
+                cleanResult.push('');
+            }
+            
+            return cleanResult;
         }
 
         async function parseExcel(file) {
@@ -2241,5 +2485,5 @@
             });
         });
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99f45ca9901945c4',t:'MTc2MzI2ODU2OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99f4745744724b94',t:'MTc2MzI2OTUzOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
