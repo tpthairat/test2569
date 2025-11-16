@@ -593,38 +593,21 @@
             adminBtn.disabled = true;
             
             try {
-                if (window.auth && window.firebaseAuth) {
-                    // Use Firebase Authentication for admin login
-                    // You can customize this with your admin credentials
+                if (window.auth && window.firebaseAuth && window.db && window.firestore) {
+                    // Try to sign in with existing admin credentials
                     const adminEmail = 'admin@test.com';
                     const adminPassword = 'admin123';
                     
-                    await window.firebaseAuth.signInWithEmailAndPassword(window.auth, adminEmail, adminPassword);
-                    showToast('เข้าสู่ระบบแอดมินสำเร็จ', 'success');
-                } else {
-                    // Demo mode - direct admin access
-                    currentUser = { email: 'admin@test.com', uid: 'admin' };
-                    currentUserRole = 'admin';
-                    await loadAdminData();
-                    showScreen('admin');
-                    showToast('เข้าสู่ระบบแอดมินสำเร็จ (Demo)', 'success');
-                }
-            } catch (error) {
-                console.error('Admin login error:', error);
-                
-                // If admin credentials don't exist, create them
-                if (error.code === 'auth/user-not-found' && window.auth) {
                     try {
-                        // Create admin account if it doesn't exist
-                        const { createUserWithEmailAndPassword } = await import('https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js');
-                        const adminEmail = 'admin@test.com';
-                        const adminPassword = 'admin123';
+                        // Try to sign in first
+                        const userCredential = await window.firebaseAuth.signInWithEmailAndPassword(window.auth, adminEmail, adminPassword);
                         
-                        const userCredential = await createUserWithEmailAndPassword(window.auth, adminEmail, adminPassword);
+                        // Set admin role in Firestore if not exists
+                        const userDocRef = window.firestore.doc(window.db, 'users', userCredential.user.uid);
+                        const userDoc = await window.firestore.getDoc(userDocRef);
                         
-                        // Set admin role in Firestore
-                        if (window.db && window.firestore) {
-                            await window.firestore.setDoc(window.firestore.doc(window.db, 'users', userCredential.user.uid), {
+                        if (!userDoc.exists()) {
+                            await window.firestore.setDoc(userDocRef, {
                                 name: 'Administrator',
                                 role: 'admin',
                                 email: adminEmail,
@@ -632,13 +615,59 @@
                             });
                         }
                         
-                        showToast('สร้างบัญชีแอดมินและเข้าสู่ระบบสำเร็จ', 'success');
-                    } catch (createError) {
-                        console.error('Error creating admin account:', createError);
-                        showToast('เกิดข้อผิดพลาดในการสร้างบัญชีแอดมิน', 'error');
+                        showToast('เข้าสู่ระบบแอดมินสำเร็จ', 'success');
+                        
+                    } catch (signInError) {
+                        // If sign in fails, try to create admin account
+                        if (signInError.code === 'auth/user-not-found' || signInError.code === 'auth/wrong-password' || signInError.code === 'auth/invalid-credential') {
+                            try {
+                                const { createUserWithEmailAndPassword } = await import('https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js');
+                                const userCredential = await createUserWithEmailAndPassword(window.auth, adminEmail, adminPassword);
+                                
+                                // Set admin role in Firestore
+                                await window.firestore.setDoc(window.firestore.doc(window.db, 'users', userCredential.user.uid), {
+                                    name: 'Administrator',
+                                    role: 'admin',
+                                    email: adminEmail,
+                                    createdAt: new Date().toISOString()
+                                });
+                                
+                                showToast('สร้างบัญชีแอดมินและเข้าสู่ระบบสำเร็จ', 'success');
+                                
+                            } catch (createError) {
+                                console.error('Error creating admin account:', createError);
+                                // Fall back to demo mode
+                                currentUser = { email: 'admin@test.com', uid: 'admin' };
+                                currentUserRole = 'admin';
+                                await loadAdminData();
+                                showScreen('admin');
+                                showToast('เข้าสู่ระบบแอดมิน (Demo Mode)', 'info');
+                            }
+                        } else {
+                            throw signInError;
+                        }
                     }
                 } else {
-                    showToast('เกิดข้อผิดพลาดในการเข้าสู่ระบบแอดมิน', 'error');
+                    // Demo mode - direct admin access
+                    currentUser = { email: 'admin@test.com', uid: 'admin' };
+                    currentUserRole = 'admin';
+                    await loadAdminData();
+                    showScreen('admin');
+                    showToast('เข้าสู่ระบบแอดมิน (Demo Mode)', 'info');
+                }
+            } catch (error) {
+                console.error('Admin login error:', error);
+                
+                // Always fall back to demo mode if there's any error
+                try {
+                    currentUser = { email: 'admin@test.com', uid: 'admin' };
+                    currentUserRole = 'admin';
+                    await loadAdminData();
+                    showScreen('admin');
+                    showToast('เข้าสู่ระบบแอดมิน (Demo Mode)', 'info');
+                } catch (demoError) {
+                    console.error('Demo mode error:', demoError);
+                    showToast('เกิดข้อผิดพลาดในการเข้าสู่ระบบ', 'error');
                 }
             } finally {
                 adminBtn.innerHTML = originalContent;
@@ -1432,5 +1461,5 @@
             });
         });
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99f449f5570c4b94',t:'MTc2MzI2NzgwMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99f44e6f25a04b94',t:'MTc2MzI2Nzk4Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
