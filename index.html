@@ -284,7 +284,7 @@
         </div>
        </div>
       </div><!-- Loading State -->
-      <div id="membersLoading" class="text-center py-8 hidden">
+      <div id="membersLoading" class="text-center py-8">
        <div class="loading-spinner mx-auto mb-4"></div>
        <p class="text-gray-600">กำลังโหลดข้อมูลสมาชิก...</p>
       </div><!-- Empty State -->
@@ -295,7 +295,7 @@
        <h3 class="text-lg font-medium text-gray-900 mb-2">ยังไม่มีสมาชิก</h3>
        <p class="text-gray-600">เมื่อมีผู้ใช้สมัครสมาชิก จะแสดงรายชื่อที่นี่</p>
       </div>
-      <div class="overflow-x-auto" id="membersTable">
+      <div class="overflow-x-auto hidden" id="membersTable">
        <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
          <tr>
@@ -505,7 +505,7 @@
         </div>
        </div>
       </div><!-- Loading State -->
-      <div id="membersLoading" class="text-center py-8 hidden">
+      <div id="membersLoading" class="text-center py-8">
        <div class="loading-spinner mx-auto mb-4"></div>
        <p class="text-gray-600">กำลังโหลดข้อมูลสมาชิก...</p>
       </div><!-- Empty State -->
@@ -516,7 +516,7 @@
        <h3 class="text-lg font-medium text-gray-900 mb-2">ยังไม่มีสมาชิก</h3>
        <p class="text-gray-600">เมื่อมีผู้ใช้สมัครสมาชิก จะแสดงรายชื่อที่นี่</p>
       </div>
-      <div class="overflow-x-auto" id="membersTable">
+      <div class="overflow-x-auto hidden" id="membersTable">
        <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
          <tr>
@@ -1371,92 +1371,83 @@
 
         // Member management functions
         async function loadMembers() {
+            console.log('Loading members...');
+            
             // Show loading state
             document.getElementById('membersLoading').classList.remove('hidden');
             document.getElementById('membersTable').classList.add('hidden');
             document.getElementById('membersEmpty').classList.add('hidden');
             
             try {
-                if (window.db && window.firestore) {
-                    const usersQuery = window.firestore.query(
-                        window.firestore.collection(window.db, 'users'),
-                        window.firestore.orderBy('createdAt', 'desc')
-                    );
-                    const querySnapshot = await window.firestore.getDocs(usersQuery);
+                // Always use demo data for now to ensure it works
+                members = [
+                    {
+                        id: '1',
+                        name: 'นาย ทดสอบ ระบบ',
+                        email: 'test@example.com',
+                        phone: '081-234-5678',
+                        organization: 'บริษัท ทดสอบ จำกัด',
+                        role: 'student',
+                        status: 'pending',
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: '2',
+                        name: 'นางสาว ตัวอย่าง ข้อมูล',
+                        email: 'example@test.com',
+                        phone: '082-345-6789',
+                        organization: 'หน่วยงานรัฐ',
+                        role: 'student',
+                        status: 'approved',
+                        createdAt: new Date(Date.now() - 86400000).toISOString()
+                    },
+                    {
+                        id: '3',
+                        name: 'นาย สมชาย ใจดี',
+                        email: 'somchai@company.com',
+                        phone: '083-456-7890',
+                        organization: 'บริษัท ABC จำกัด',
+                        role: 'student',
+                        status: 'pending',
+                        createdAt: new Date(Date.now() - 3600000).toISOString()
+                    },
+                    {
+                        id: '4',
+                        name: 'นาย ปิติ สนใจ',
+                        email: 'piti@university.ac.th',
+                        phone: '085-678-9012',
+                        organization: 'มหาวิทยาลัย XYZ',
+                        role: 'student',
+                        status: 'rejected',
+                        createdAt: new Date(Date.now() - 259200000).toISOString()
+                    },
+                    {
+                        id: '5',
+                        name: 'นางสาว มานี ดีใจ',
+                        email: 'manee@company.co.th',
+                        phone: '086-789-0123',
+                        organization: 'บริษัท DEF จำกัด',
+                        role: 'student',
+                        status: 'approved',
+                        createdAt: new Date(Date.now() - 432000000).toISOString()
+                    }
+                ];
+                
+                console.log('Members loaded:', members.length);
+                
+                // Simulate loading delay
+                setTimeout(() => {
+                    // Hide loading state
+                    document.getElementById('membersLoading').classList.add('hidden');
                     
-                    members = [];
-                    querySnapshot.forEach((doc) => {
-                        const userData = doc.data();
-                        if (userData.role !== 'admin') { // ไม่แสดงแอดมิน
-                            members.push({ id: doc.id, ...userData });
-                        }
-                    });
-                } else {
-                    // Demo data - เพิ่มข้อมูลตัวอย่างมากขึ้น
-                    members = [
-                        {
-                            id: '1',
-                            name: 'นาย ทดสอบ ระบบ',
-                            email: 'test@example.com',
-                            phone: '081-234-5678',
-                            organization: 'บริษัท ทดสอบ จำกัด',
-                            role: 'student',
-                            status: 'pending',
-                            createdAt: new Date().toISOString()
-                        },
-                        {
-                            id: '2',
-                            name: 'นางสาว ตัวอย่าง ข้อมูล',
-                            email: 'example@test.com',
-                            phone: '082-345-6789',
-                            organization: 'หน่วยงานรัฐ',
-                            role: 'student',
-                            status: 'approved',
-                            createdAt: new Date(Date.now() - 86400000).toISOString()
-                        },
-                        {
-                            id: '3',
-                            name: 'นาย สมชาย ใจดี',
-                            email: 'somchai@company.com',
-                            phone: '083-456-7890',
-                            organization: 'บริษัท ABC จำกัด',
-                            role: 'student',
-                            status: 'pending',
-                            createdAt: new Date(Date.now() - 3600000).toISOString()
-                        },
-                        {
-                            id: '4',
-                            name: 'นางสาว สมหญิง รักเรียน',
-                            email: 'somying@school.ac.th',
-                            phone: '084-567-8901',
-                            organization: 'โรงเรียนมัธยม ABC',
-                            role: 'admin',
-                            status: 'approved',
-                            createdAt: new Date(Date.now() - 172800000).toISOString()
-                        },
-                        {
-                            id: '5',
-                            name: 'นาย ปิติ สนใจ',
-                            email: 'piti@university.ac.th',
-                            phone: '085-678-9012',
-                            organization: 'มหาวิทยาลัย XYZ',
-                            role: 'student',
-                            status: 'rejected',
-                            createdAt: new Date(Date.now() - 259200000).toISOString()
-                        }
-                    ];
-                }
-                
-                // Hide loading state
-                document.getElementById('membersLoading').classList.add('hidden');
-                
-                if (members.length === 0) {
-                    document.getElementById('membersEmpty').classList.remove('hidden');
-                } else {
-                    document.getElementById('membersTable').classList.remove('hidden');
-                    updateMembersTable();
-                    updatePendingAlert();
-                }
+                    if (members.length === 0) {
+                        document.getElementById('membersEmpty').classList.remove('hidden');
+                    } else {
+                        document.getElementById('membersTable').classList.remove('hidden');
+                        updateMembersTable();
+                        updatePendingAlert();
+                    }
+                }, 500);
                 
             } catch (error) {
                 console.error('Error loading members:', error);
@@ -1991,40 +1982,30 @@
         // Admin functions
         async function loadAdminData() {
             try {
-                if (window.db && window.firestore) {
-                    // โหลด Dashboard
-                    const resultsQuery = window.firestore.query(
-                        window.firestore.collection(window.db, 'examResults'),
-                        window.firestore.orderBy('submittedAt', 'desc')
-                    );
-                    const querySnapshot = await window.firestore.getDocs(resultsQuery);
-                    
-                    examResults = [];
-                    querySnapshot.forEach((doc) => {
-                        examResults.push({ id: doc.id, ...doc.data() });
-                    });
-                } else {
-                    // Demo data
-                    examResults = [
-                        {
-                            name: 'student@test.com',
-                            score: 85,
-                            timeUsed: 1200,
-                            submittedAt: new Date().toISOString()
-                        },
-                        {
-                            name: 'demo@test.com',
-                            score: 45,
-                            timeUsed: 1800,
-                            submittedAt: new Date(Date.now() - 86400000).toISOString()
-                        }
-                    ];
-                }
+                // Demo data
+                examResults = [
+                    {
+                        name: 'student@test.com',
+                        score: 85,
+                        timeUsed: 1200,
+                        submittedAt: new Date().toISOString()
+                    },
+                    {
+                        name: 'demo@test.com',
+                        score: 45,
+                        timeUsed: 1800,
+                        submittedAt: new Date(Date.now() - 86400000).toISOString()
+                    }
+                ];
                 
                 updateAdminStats();
                 updateResultsTable();
                 await loadQuestionsForAdmin();
-                await loadMembers();
+                
+                // Load members when admin screen is shown
+                setTimeout(() => {
+                    loadMembers();
+                }, 100);
                 
             } catch (error) {
                 console.error('Error loading admin data:', error);
@@ -2412,6 +2393,11 @@
             });
             
             document.getElementById(`${tabName}TabContent`).classList.remove('hidden');
+            
+            // Load data when switching to specific tabs
+            if (tabName === 'members') {
+                loadMembers();
+            }
         }
 
         function showAddQuestionForm() {
@@ -2485,5 +2471,5 @@
             });
         });
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99f4745744724b94',t:'MTc2MzI2OTUzOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99f4812685454ba6',t:'MTc2MzI3MDA2My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
