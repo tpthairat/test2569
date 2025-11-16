@@ -3,13 +3,14 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบสอบออนไลน์ครบชุด</title>
+  <title>ระบบสอบออนไลน์ - Mobile First</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
         body {
             box-sizing: border-box;
         }
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+        
         body { 
             font-family: 'Sarabun', sans-serif; 
             -webkit-user-select: none;
@@ -18,7 +19,7 @@
             user-select: none;
         }
         
-        /* Animations */
+        /* Mobile-First Animations */
         .fade-in {
             animation: fadeIn 0.5s ease-in;
         }
@@ -37,21 +38,22 @@
             50% { background-color: rgb(220 38 38); }
         }
         
-        /* Card Animations */
+        /* Mobile Card Animations */
         .answer-card {
             transition: all 0.3s ease;
+            min-height: 60px;
         }
         
         .answer-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
         }
         
         .answer-card.selected {
             background: linear-gradient(135deg, #3b82f6, #1d4ed8);
             color: white;
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
         }
         
         /* Loading Spinner */
@@ -74,51 +76,52 @@
             transition: width 0.5s ease;
         }
         
-        /* Mobile Optimizations */
+        /* Mobile Touch Targets */
         .touch-target {
             min-height: 48px;
             min-width: 48px;
         }
         
-        @media (max-width: 640px) {
-            .mobile-padding {
-                padding-left: 1rem;
-                padding-right: 1rem;
-            }
-        }
-        
-        /* Table Responsive */
+        /* Mobile Responsive Tables */
         .table-container {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
         }
         
-        /* Sticky Header */
+        /* Sticky Header for Mobile */
         .sticky-header {
             position: sticky;
             top: 0;
             z-index: 40;
             backdrop-filter: blur(10px);
         }
+        
+        /* Mobile-First Typography */
+        @media (max-width: 640px) {
+            .mobile-text-lg { font-size: 1.125rem; }
+            .mobile-text-xl { font-size: 1.25rem; }
+            .mobile-text-2xl { font-size: 1.5rem; }
+        }
     </style>
   <style>@view-transition { navigation: auto; }</style>
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
   <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
  </head>
- <body class="bg-gradient-to-br from-slate-50 to-blue-50 min-h-full"><!-- Firebase SDK v9 -->
+ <body class="bg-gradient-to-br from-slate-50 to-blue-50 min-h-full"><!-- Firebase SDK v9 Modular -->
   <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
-        import { getFirestore, collection, addDoc, doc, getDoc, setDoc, getDocs, query, orderBy, where, serverTimestamp, deleteDoc, updateDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+        import { getFirestore, collection, addDoc, doc, getDoc, setDoc, getDocs, query, orderBy, where, serverTimestamp, deleteDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
 
-        // Firebase Configuration - ใช้ Demo Config สำหรับทดสอบ
+        // Firebase Configuration - แทนที่ด้วยค่าจริงของคุณ
         const firebaseConfig = {
-            apiKey: "AIzaSyDemoKeyForTesting123456789",
-            authDomain: "demo-project.firebaseapp.com", 
-            projectId: "demo-project-12345",
-            storageBucket: "demo-project.appspot.com",
-            messagingSenderId: "123456789012",
-            appId: "1:123456789012:web:abcdef123456"
+            apiKey: "AIzaSyB8j96zKNrU_ZqkXm6uvamdF-vpjqzK-aA",
+            authDomain: "test2569-319f6.firebaseapp.com",
+            databaseURL: "https://test2569-319f6-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "test2569-319f6",
+            storageBucket: "test2569-319f6.firebasestorage.app",
+            messagingSenderId: "3578824826",
+            appId: "1:3578824826:web:38e5956c347c869f0153c3"
         };
 
         let app, auth, db;
@@ -134,7 +137,6 @@
             // Global Firebase functions
             window.firebaseAuth = auth;
             window.firebaseDb = db;
-            window.firebaseApp = app;
             window.signInWithEmailAndPassword = signInWithEmailAndPassword;
             window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
             window.signOut = signOut;
@@ -151,35 +153,23 @@
             window.serverTimestamp = serverTimestamp;
             window.deleteDoc = deleteDoc;
             window.updateDoc = updateDoc;
-            window.onSnapshot = onSnapshot;
             
             // Initialize app when Firebase is ready
             window.initializeApp = function() {
                 checkAuthState();
             };
             
-            // Auto-initialize with delay to ensure DOM is ready
+            // Auto-initialize
             setTimeout(() => {
                 window.initializeApp();
             }, 100);
             
         } catch (error) {
             console.error('Firebase initialization error:', error);
-            
-            // Fallback: Use localStorage for demo purposes
-            window.useLocalStorage = true;
-            
-            // Mock Firebase functions for demo
-            window.firebaseAuth = null;
-            window.firebaseDb = null;
-            
-            // Initialize demo mode
-            setTimeout(() => {
-                initializeDemoMode();
-            }, 100);
+            showToast('เกิดข้อผิดพลาดในการเชื่อมต่อ Firebase', 'error');
         }
     </script><!-- Login Screen -->
-  <div id="loginScreen" class="min-h-full flex items-center justify-center mobile-padding py-8">
+  <div id="loginScreen" class="min-h-full flex items-center justify-center px-4 py-8">
    <div class="w-full max-w-md fade-in"><!-- Header -->
     <div class="text-center mb-8">
      <div class="text-6xl mb-4">
@@ -187,21 +177,6 @@
      </div>
      <h1 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-3">ระบบสอบออนไลน์</h1>
      <p class="text-lg text-gray-600">เข้าสู่ระบบเพื่อเริ่มทำข้อสอบ</p>
-    </div><!-- Demo Mode Notice -->
-    <div id="demoNotice" class="hidden bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-2xl p-4 mb-6">
-     <div class="flex items-center">
-      <div class="text-2xl mr-3">
-       🔧
-      </div>
-      <div>
-       <div class="font-semibold">
-        Demo Mode
-       </div>
-       <div class="text-sm opacity-90">
-        ระบบทำงานด้วย localStorage | ทดลอง: admin@demo.com / 123456
-       </div>
-      </div>
-     </div>
     </div><!-- Login Form -->
     <div class="bg-white rounded-2xl p-6 shadow-lg mb-6">
      <form id="loginForm" class="space-y-6">
@@ -215,8 +190,8 @@
      <p class="text-gray-600 mb-4">ยังไม่มีบัญชี?</p><button onclick="toggleRegisterMode()" id="toggleBtn" class="text-blue-600 hover:text-blue-800 font-semibold underline"> สมัครสมาชิก </button>
     </div>
    </div>
-  </div><!-- Pre-Exam Screen -->
-  <div id="preExamScreen" class="hidden min-h-full flex items-center justify-center mobile-padding py-8">
+  </div><!-- Student Pre-Exam Screen -->
+  <div id="preExamScreen" class="hidden min-h-full flex items-center justify-center px-4 py-8">
    <div class="w-full max-w-md fade-in"><!-- User Info -->
     <div class="bg-white rounded-2xl p-6 shadow-lg mb-6">
      <div class="text-center mb-6">
@@ -229,7 +204,7 @@
      <div class="mb-6"><label for="examinerName" class="block text-sm font-semibold text-gray-700 mb-2"> 👤 ชื่อ-นามสกุล </label> <input type="text" id="examinerName" required class="w-full px-4 py-4 text-lg border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-colors" placeholder="กรุณากรอกชื่อ-นามสกุล">
      </div>
      <div class="space-y-4">
-      <div class="flex justify-between items-center p-4 bg-blue-50 rounded-xl"><span class="font-semibold text-gray-700">จำนวนข้อสอบ</span> <span class="text-blue-600 font-bold">15 ข้อ</span>
+      <div class="flex justify-between items-center p-4 bg-blue-50 rounded-xl"><span class="font-semibold text-gray-700">จำนวนข้อสอบ</span> <span id="totalQuestions" class="text-blue-600 font-bold">15 ข้อ</span>
       </div>
       <div class="flex justify-between items-center p-4 bg-green-50 rounded-xl"><span class="font-semibold text-gray-700">เวลาที่ใช้</span> <span class="text-green-600 font-bold">30 นาที</span>
       </div>
@@ -239,7 +214,7 @@
     </div><!-- Start Exam Button --> <button onclick="startExam()" class="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-6 px-8 rounded-2xl text-xl transition-all transform hover:scale-105 shadow-lg touch-target mb-4"> 📝 เริ่มทำข้อสอบ </button> <!-- Logout Button --> <button onclick="logout()" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-xl transition-colors touch-target"> 🚪 ออกจากระบบ </button>
    </div>
   </div><!-- Already Taken Screen -->
-  <div id="alreadyTakenScreen" class="hidden min-h-full flex items-center justify-center mobile-padding py-8">
+  <div id="alreadyTakenScreen" class="hidden min-h-full flex items-center justify-center px-4 py-8">
    <div class="w-full max-w-md fade-in text-center">
     <div class="bg-white rounded-2xl p-8 shadow-lg">
      <div class="text-6xl mb-6">
@@ -278,7 +253,7 @@
      </div>
     </div>
    </div>
-   <div class="mobile-padding py-6 max-w-4xl mx-auto"><!-- Question Container -->
+   <div class="px-4 py-6 max-w-4xl mx-auto"><!-- Question Container -->
     <div id="questionContainer" class="bg-white rounded-2xl p-6 mb-6 shadow-lg"><!-- คำถามจะถูกแสดงที่นี่ -->
     </div><!-- Navigation -->
     <div class="flex flex-col sm:flex-row gap-4 justify-between"><button id="prevBtn" onclick="previousQuestion()" class="order-2 sm:order-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-4 px-6 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed touch-target"> ← ข้อก่อนหน้า </button>
@@ -287,7 +262,7 @@
     </div>
    </div>
   </div><!-- Result Screen -->
-  <div id="resultScreen" class="hidden min-h-full flex items-center justify-center mobile-padding py-8">
+  <div id="resultScreen" class="hidden min-h-full flex items-center justify-center px-4 py-8">
    <div class="w-full max-w-2xl fade-in"><!-- Header -->
     <div class="text-center mb-8">
      <div class="text-6xl mb-4">
@@ -326,10 +301,10 @@
     <div class="max-w-7xl mx-auto px-4 py-6">
      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
       <div>
-       <h1 class="text-3xl font-bold text-gray-800">📊 Dashboard ผู้ดูแล</h1>
+       <h1 class="text-3xl font-bold text-gray-800">📊 Admin Dashboard</h1>
        <p class="text-gray-600">จัดการและดูผลการสอบทั้งหมด</p>
       </div>
-      <div class="flex gap-3"><button onclick="showQuestionManager()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-xl transition-colors touch-target"> 📝 จัดการข้อสอบ </button> <button onclick="exportToCSV()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl transition-colors touch-target"> 📥 Export CSV </button> <button onclick="logout()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-xl transition-colors touch-target"> 🚪 ออกจากระบบ </button>
+      <div class="flex flex-wrap gap-3"><button onclick="showQuestionManager()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-xl transition-colors touch-target"> 📝 จัดการข้อสอบ </button> <button onclick="exportToCSV()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl transition-colors touch-target"> 📥 Export CSV </button> <button onclick="logout()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-xl transition-colors touch-target"> 🚪 ออกจากระบบ </button>
       </div>
      </div>
     </div>
@@ -464,6 +439,8 @@
       </div>
       <div><label class="block text-sm font-semibold text-gray-700 mb-2">✅ คำตอบที่ถูกต้อง</label> <select id="correctAnswer" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-colors"> <option value="">เลือกคำตอบที่ถูกต้อง</option> <option value="0">A</option> <option value="1">B</option> <option value="2">C</option> <option value="3">D</option> </select>
       </div>
+      <div><label class="block text-sm font-semibold text-gray-700 mb-2">📂 หมวดหมู่</label> <input type="text" id="category" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-colors" placeholder="เช่น คณิตศาสตร์, วิทยาศาสตร์, ภาษาไทย">
+      </div>
       <div class="flex gap-4"><button type="submit" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 rounded-xl transition-colors touch-target"> 💾 บันทึกข้อสอบ </button> <button type="button" onclick="hideAddQuestionForm()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-4 px-6 rounded-xl transition-colors touch-target"> ❌ ยกเลิก </button>
       </div>
      </form>
@@ -487,44 +464,8 @@
      </div>
     </div>
    </div>
-  </div><!-- Edit Question Modal -->
-  <div id="editQuestionModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 mobile-padding">
-   <div class="bg-white rounded-2xl p-6 w-full max-w-2xl shadow-2xl max-h-full overflow-y-auto">
-    <h3 class="text-2xl font-bold text-gray-800 mb-6">✏️ แก้ไขข้อสอบ</h3>
-    <form id="editQuestionForm" class="space-y-6"><input type="hidden" id="editQuestionId">
-     <div><label class="block text-sm font-semibold text-gray-700 mb-2">❓ คำถาม</label> <textarea id="editQuestionText" required rows="3" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-colors resize-none" placeholder="กรอกคำถาม..."></textarea>
-     </div>
-     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <div><label class="block text-sm font-semibold text-gray-700 mb-2">🅰️ ตัวเลือก A</label> <input type="text" id="editOption1" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-colors" placeholder="ตัวเลือก A">
-      </div>
-      <div><label class="block text-sm font-semibold text-gray-700 mb-2">🅱️ ตัวเลือก B</label> <input type="text" id="editOption2" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-colors" placeholder="ตัวเลือก B">
-      </div>
-      <div><label class="block text-sm font-semibold text-gray-700 mb-2">🅲 ตัวเลือก C</label> <input type="text" id="editOption3" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-colors" placeholder="ตัวเลือก C">
-      </div>
-      <div><label class="block text-sm font-semibold text-gray-700 mb-2">🅳 ตัวเลือก D</label> <input type="text" id="editOption4" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-colors" placeholder="ตัวเลือก D">
-      </div>
-     </div>
-     <div><label class="block text-sm font-semibold text-gray-700 mb-2">✅ คำตอบที่ถูกต้อง</label> <select id="editCorrectAnswer" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-colors"> <option value="">เลือกคำตอบที่ถูกต้อง</option> <option value="0">A</option> <option value="1">B</option> <option value="2">C</option> <option value="3">D</option> </select>
-     </div>
-     <div class="flex gap-4"><button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl transition-colors touch-target"> 💾 บันทึกการแก้ไข </button> <button type="button" onclick="hideEditQuestionModal()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-4 px-6 rounded-xl transition-colors touch-target"> ❌ ยกเลิก </button>
-     </div>
-    </form>
-   </div>
-  </div><!-- Delete Confirmation Modal -->
-  <div id="deleteConfirmModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 mobile-padding">
-   <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl">
-    <div class="text-center mb-6">
-     <div class="text-4xl mb-4">
-      🗑️
-     </div>
-     <h3 class="text-xl font-bold text-gray-800 mb-2">ยืนยันการลบ</h3>
-     <p class="text-gray-600">คุณแน่ใจหรือไม่ที่จะลบข้อสอบนี้?</p>
-    </div>
-    <div class="flex gap-4"><button onclick="hideDeleteConfirmModal()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-xl transition-colors touch-target"> ยกเลิก </button> <button onclick="confirmDeleteQuestion()" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-xl transition-colors touch-target"> ลบ </button>
-    </div>
-   </div>
   </div><!-- Confirmation Modal -->
-  <div id="confirmModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 mobile-padding">
+  <div id="confirmModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
    <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl">
     <div class="text-center mb-6">
      <div class="text-4xl mb-4">
@@ -543,12 +484,11 @@
    </div>
   </div>
   <script>
-        // ข้อมูลข้อสอบ (จะโหลดจาก Firebase)
-        let examQuestions = [];
-
         // ตัวแปรสำหรับจัดการสถานะ
         let currentUser = null;
+        let userRole = null;
         let isRegisterMode = false;
+        let examQuestions = [];
         let currentQuestion = 0;
         let userAnswers = [];
         let examStartTime = null;
@@ -558,61 +498,22 @@
         let shuffledQuestions = [];
         let isExamActive = false;
         let allExamResults = [];
-        let questionToDelete = null;
         let examinerName = '';
-
-        // เริ่มต้น Demo Mode (ใช้ localStorage แทน Firebase)
-        function initializeDemoMode() {
-            console.log('Starting Demo Mode - using localStorage');
-            
-            // แสดงข้อความแจ้งเตือน
-            showToast('🔧 Demo Mode: ใช้ localStorage แทน Firebase', 'info');
-            
-            // แสดง Demo Notice
-            document.getElementById('demoNotice').classList.remove('hidden');
-            
-            // สร้าง Admin account เริ่มต้น
-            const users = JSON.parse(localStorage.getItem('demoUsers') || '{}');
-            if (!users['admin@demo.com']) {
-                users['admin@demo.com'] = {
-                    uid: 'demo_admin',
-                    email: 'admin@demo.com',
-                    role: 'admin',
-                    password: '123456',
-                    createdAt: new Date().toISOString()
-                };
-                localStorage.setItem('demoUsers', JSON.stringify(users));
-            }
-            
-            // ตรวจสอบการล็อกอินจาก localStorage
-            const savedUser = localStorage.getItem('demoUser');
-            if (savedUser) {
-                currentUser = JSON.parse(savedUser);
-                handleUserLogin(currentUser);
-            } else {
-                showScreen('loginScreen');
-            }
-        }
 
         // ตรวจสอบสถานะการล็อกอิน
         function checkAuthState() {
-            if (window.useLocalStorage) {
-                initializeDemoMode();
-                return;
-            }
-            
             if (!window.firebaseAuth) {
-                console.error('Firebase Auth not available');
-                initializeDemoMode();
+                showToast('เกิดข้อผิดพลาดในการเชื่อมต่อ Firebase', 'error');
                 return;
             }
-            
+
             window.onAuthStateChanged(window.firebaseAuth, async (user) => {
                 if (user) {
                     currentUser = user;
                     await handleUserLogin(user);
                 } else {
                     currentUser = null;
+                    userRole = null;
                     showScreen('loginScreen');
                 }
             });
@@ -623,56 +524,53 @@
             showToast('กำลังตรวจสอบข้อมูล...', 'info');
             
             try {
-                // โหลดข้อสอบ
-                await loadQuestionsFromFirebase();
+                // ตรวจสอบ role ของผู้ใช้จาก Firestore
+                const userDoc = await window.getDoc(window.doc(window.firebaseDb, 'users', user.uid));
                 
-                // ตรวจสอบว่าเป็น admin หรือไม่
-                let isAdmin = false;
-                
-                if (window.useLocalStorage || !window.firebaseDb) {
-                    // Demo Mode - ตรวจสอบจาก email และ role
-                    isAdmin = user.email === 'admin@demo.com' || user.role === 'admin';
-                    console.log('Demo Mode - Checking admin:', user.email, user.role, 'isAdmin:', isAdmin);
-                } else {
-                    // Firebase Mode
-                    const userDoc = await window.getDoc(window.doc(window.firebaseDb, 'users', user.uid));
+                if (userDoc.exists()) {
                     const userData = userDoc.data();
-                    isAdmin = userData && userData.role === 'admin';
-                }
-                
-                if (isAdmin) {
-                    // แสดง Dashboard สำหรับ admin
-                    showToast('เข้าสู่ระบบแอดมินสำเร็จ!', 'success');
-                    await loadDashboardData();
-                    showScreen('dashboardScreen');
-                    return;
-                }
-                
-                // ตรวจสอบว่าทำข้อสอบแล้วหรือยัง
-                let hasExamResult = false;
-                let examData = null;
-                
-                if (window.useLocalStorage || !window.firebaseDb) {
-                    // Demo Mode - ตรวจสอบจาก localStorage
-                    const examResults = JSON.parse(localStorage.getItem('demoExamResults') || '{}');
-                    examData = examResults[user.uid];
-                    hasExamResult = !!examData;
-                } else {
-                    // Firebase Mode
-                    const examDoc = await window.getDoc(window.doc(window.firebaseDb, 'examResults', user.uid));
-                    hasExamResult = examDoc.exists();
-                    if (hasExamResult) {
-                        examData = examDoc.data();
+                    userRole = userData.role;
+                    
+                    // ตรวจสอบ role และนำทางไปหน้าที่เหมาะสม
+                    if (userRole === 'admin') {
+                        // แสดง Admin Dashboard
+                        showToast('เข้าสู่ระบบแอดมินสำเร็จ!', 'success');
+                        await loadDashboardData();
+                        showScreen('dashboardScreen');
+                        return;
+                    } else if (userRole === 'student') {
+                        // โหลดข้อสอบและตรวจสอบว่าทำแล้วหรือยัง
+                        await loadQuestionsFromFirebase();
+                        
+                        const examDoc = await window.getDoc(window.doc(window.firebaseDb, 'examResults', user.uid));
+                        if (examDoc.exists()) {
+                            // ทำข้อสอบแล้ว - แสดงผลการสอบ
+                            const examData = examDoc.data();
+                            showUserScore(examData);
+                            showScreen('alreadyTakenScreen');
+                        } else {
+                            // ยังไม่ได้ทำข้อสอบ - แสดงหน้าเตรียมสอบ
+                            document.getElementById('welcomeUser').textContent = user.email;
+                            document.getElementById('totalQuestions').textContent = `${examQuestions.length} ข้อ`;
+                            showScreen('preExamScreen');
+                        }
+                    } else {
+                        // ไม่มีสิทธิ์
+                        showToast('คุณไม่มีสิทธิ์เข้าใช้งานระบบ', 'error');
+                        await logout();
                     }
-                }
-                
-                if (hasExamResult) {
-                    // ทำข้อสอบแล้ว - แสดงผลการสอบ
-                    showUserScore(examData);
-                    showScreen('alreadyTakenScreen');
                 } else {
-                    // ยังไม่ได้ทำข้อสอบ - แสดงหน้าเตรียมสอบ
+                    // ผู้ใช้ใหม่ - สร้างข้อมูลเริ่มต้นเป็น student
+                    await window.setDoc(window.doc(window.firebaseDb, 'users', user.uid), {
+                        email: user.email,
+                        role: 'student',
+                        createdAt: window.serverTimestamp()
+                    });
+                    
+                    userRole = 'student';
+                    await loadQuestionsFromFirebase();
                     document.getElementById('welcomeUser').textContent = user.email;
+                    document.getElementById('totalQuestions').textContent = `${examQuestions.length} ข้อ`;
                     showScreen('preExamScreen');
                 }
             } catch (error) {
@@ -681,51 +579,33 @@
             }
         }
 
-        // โหลดข้อสอบจาก Firebase หรือ localStorage
+        // โหลดข้อสอบจาก Firestore
         async function loadQuestionsFromFirebase() {
             try {
-                if (window.useLocalStorage || !window.firebaseDb) {
-                    // Demo Mode - โหลดจาก localStorage
-                    const savedQuestions = localStorage.getItem('demoQuestions');
-                    if (savedQuestions) {
-                        examQuestions = JSON.parse(savedQuestions);
-                    } else {
-                        // ใช้ข้อสอบเริ่มต้นและบันทึกลง localStorage
-                        examQuestions = getDefaultQuestions().map((q, index) => ({
-                            id: 'demo_' + index,
-                            ...q
-                        }));
-                        localStorage.setItem('demoQuestions', JSON.stringify(examQuestions));
-                    }
-                } else {
-                    // Firebase Mode
-                    const q = window.query(window.collection(window.firebaseDb, 'questions'), window.orderBy('createdAt', 'asc'));
-                    const querySnapshot = await window.getDocs(q);
-                    
-                    examQuestions = [];
-                    querySnapshot.forEach((doc) => {
-                        const data = doc.data();
-                        examQuestions.push({
-                            id: doc.id,
-                            question: data.question,
-                            options: data.options,
-                            correct: data.correct
-                        });
+                const q = window.query(window.collection(window.firebaseDb, 'questionBank'), window.orderBy('createdAt', 'asc'));
+                const querySnapshot = await window.getDocs(q);
+                
+                examQuestions = [];
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    examQuestions.push({
+                        id: doc.id,
+                        questionText: data.questionText,
+                        options: data.options,
+                        answer: data.answer,
+                        category: data.category || 'ทั่วไป'
                     });
-                    
-                    // ถ้าไม่มีข้อสอบใน Firebase ให้ใช้ข้อสอบเริ่มต้น
-                    if (examQuestions.length === 0) {
-                        await createDefaultQuestions();
-                    }
+                });
+                
+                // ถ้าไม่มีข้อสอบใน Firestore ให้ใช้ข้อสอบเริ่มต้น
+                if (examQuestions.length === 0) {
+                    await createDefaultQuestions();
                 }
                 
             } catch (error) {
                 console.error('Error loading questions:', error);
                 // ใช้ข้อสอบเริ่มต้นถ้าโหลดไม่ได้
-                examQuestions = getDefaultQuestions().map((q, index) => ({
-                    id: 'demo_' + index,
-                    ...q
-                }));
+                examQuestions = getDefaultQuestions();
             }
         }
 
@@ -735,10 +615,11 @@
             
             try {
                 for (const question of defaultQuestions) {
-                    await window.addDoc(window.collection(window.firebaseDb, 'questions'), {
-                        question: question.question,
+                    await window.addDoc(window.collection(window.firebaseDb, 'questionBank'), {
+                        questionText: question.questionText,
                         options: question.options,
-                        correct: question.correct,
+                        answer: question.answer,
+                        category: question.category,
                         createdAt: window.serverTimestamp()
                     });
                 }
@@ -756,79 +637,94 @@
         function getDefaultQuestions() {
             return [
                 {
-                    question: "เมืองหลวงของประเทศไทยคือข้อใด?",
+                    questionText: "เมืองหลวงของประเทศไทยคือข้อใด?",
                     options: ["กรุงเทพมหานคร", "เชียงใหม่", "ขอนแก่น", "หาดใหญ่"],
-                    correct: 0
+                    answer: 0,
+                    category: "ภูมิศาสตร์"
                 },
                 {
-                    question: "แม่น้ำที่ยาวที่สุดในโลกคือแม่น้ำใด?",
+                    questionText: "แม่น้ำที่ยาวที่สุดในโลกคือแม่น้ำใด?",
                     options: ["แม่น้ำอเมซอน", "แม่น้ำไนล์", "แม่น้ำแยงซีเกียง", "แม่น้ำมิสซิสซิปปี"],
-                    correct: 1
+                    answer: 1,
+                    category: "ภูมิศาสตร์"
                 },
                 {
-                    question: "ดาวเคราะห์ที่ใกล้ดวงอาทิตย์ที่สุดคือดาวใด?",
+                    questionText: "ดาวเคราะห์ที่ใกล้ดวงอาทิตย์ที่สุดคือดาวใด?",
                     options: ["ดาวศุกร์", "ดาวพุธ", "ดาวอังคาร", "ดาวโลก"],
-                    correct: 1
+                    answer: 1,
+                    category: "วิทยาศาสตร์"
                 },
                 {
-                    question: "ประเทศใดมีประชากรมากที่สุดในโลก?",
+                    questionText: "ประเทศใดมีประชากรมากที่สุดในโลก?",
                     options: ["อินเดีย", "จีน", "สหรัฐอเมริกา", "อินโดนีเซีย"],
-                    correct: 0
+                    answer: 0,
+                    category: "ภูมิศาสตร์"
                 },
                 {
-                    question: "สัตว์ใดเป็นสัตว์เลี้ยงลูกด้วยนมที่ใหญ่ที่สุดในโลก?",
+                    questionText: "สัตว์ใดเป็นสัตว์เลี้ยงลูกด้วยนมที่ใหญ่ที่สุดในโลก?",
                     options: ["ช้าง", "วาฬสีน้ำเงิน", "ยีราฟ", "ฮิปโปโปเตมัส"],
-                    correct: 1
+                    answer: 1,
+                    category: "วิทยาศาสตร์"
                 },
                 {
-                    question: "ภูเขาที่สูงที่สุดในโลกคือภูเขาใด?",
+                    questionText: "ภูเขาที่สูงที่สุดในโลกคือภูเขาใด?",
                     options: ["เอเวอเรสต์", "K2", "กิลิมันจาโร", "ฟูจิ"],
-                    correct: 0
+                    answer: 0,
+                    category: "ภูมิศาสตร์"
                 },
                 {
-                    question: "มหาสมุทรที่ใหญ่ที่สุดในโลกคือมหาสมุทรใด?",
+                    questionText: "มหาสมุทรที่ใหญ่ที่สุดในโลกคือมหาสมุทรใด?",
                     options: ["แอตแลนติก", "อินเดีย", "แปซิฟิก", "อาร์กติก"],
-                    correct: 2
+                    answer: 2,
+                    category: "ภูมิศาสตร์"
                 },
                 {
-                    question: "ธาตุที่มีสัญลักษณ์ Au คือธาตุใด?",
+                    questionText: "ธาตุที่มีสัญลักษณ์ Au คือธาตุใด?",
                     options: ["เงิน", "ทอง", "ทองแดง", "เหล็ก"],
-                    correct: 1
+                    answer: 1,
+                    category: "วิทยาศาสตร์"
                 },
                 {
-                    question: "ประเทศใดมีพื้นที่มากที่สุดในโลก?",
+                    questionText: "ประเทศใดมีพื้นที่มากที่สุดในโลก?",
                     options: ["แคนาดา", "จีน", "สหรัฐอเมริกา", "รัสเซีย"],
-                    correct: 3
+                    answer: 3,
+                    category: "ภูมิศาสตร์"
                 },
                 {
-                    question: "ดาวเคราะห์ใดที่เรียกว่า 'ดาวแดง'?",
+                    questionText: "ดาวเคราะห์ใดที่เรียกว่า 'ดาวแดง'?",
                     options: ["ดาวศุกร์", "ดาวอังคาร", "ดาวพฤหัสบดี", "ดาวเสาร์"],
-                    correct: 1
+                    answer: 1,
+                    category: "วิทยาศาสตร์"
                 },
                 {
-                    question: "สีใดที่เกิดจากการผสมของสีแดงและสีน้ำเงิน?",
+                    questionText: "สีใดที่เกิดจากการผสมของสีแดงและสีน้ำเงิน?",
                     options: ["เขียว", "เหลือง", "ม่วง", "ส้ม"],
-                    correct: 2
+                    answer: 2,
+                    category: "ศิลปะ"
                 },
                 {
-                    question: "ประเทศใดที่มีชื่อเสียงในเรื่องหอคอยเอฟเฟล?",
+                    questionText: "ประเทศใดที่มีชื่อเสียงในเรื่องหอคอยเอฟเฟล?",
                     options: ["อิตาลี", "ฝรั่งเศส", "เยอรมนี", "สเปน"],
-                    correct: 1
+                    answer: 1,
+                    category: "ภูมิศาสตร์"
                 },
                 {
-                    question: "สัตว์ใดที่สามารถบินได้แต่ไม่ใช่นก?",
+                    questionText: "สัตว์ใดที่สามารถบินได้แต่ไม่ใช่นก?",
                     options: ["ค้างคาว", "ผีเสื้อ", "แมลงวัน", "ทั้งหมดข้างต้น"],
-                    correct: 3
+                    answer: 3,
+                    category: "วิทยาศาสตร์"
                 },
                 {
-                    question: "ทวีปใดที่มีประเทศมากที่สุด?",
+                    questionText: "ทวีปใดที่มีประเทศมากที่สุด?",
                     options: ["เอเชีย", "แอฟริกา", "ยุโรป", "อเมริกาใต้"],
-                    correct: 1
+                    answer: 1,
+                    category: "ภูมิศาสตร์"
                 },
                 {
-                    question: "น้ำแข็งจะละลายที่อุณหภูมิกี่องศาเซลเซียส?",
+                    questionText: "น้ำแข็งจะละลายที่อุณหภูมิกี่องศาเซลเซียส?",
                     options: ["0 องศา", "32 องศา", "100 องศา", "-10 องศา"],
-                    correct: 0
+                    answer: 0,
+                    category: "วิทยาศาสตร์"
                 }
             ];
         }
@@ -874,22 +770,16 @@
             
             showToast('กำลังดำเนินการ...', 'info');
             
-            // ใช้ Demo Mode ถ้า Firebase ไม่พร้อม
-            if (window.useLocalStorage || !window.firebaseAuth) {
-                handleDemoAuth(email, password);
-                return;
-            }
-            
             try {
                 if (isRegisterMode) {
                     // สมัครสมาชิก
                     const userCredential = await window.createUserWithEmailAndPassword(window.firebaseAuth, email, password);
                     
-                    // บันทึกข้อมูลผู้ใช้
+                    // บันทึกข้อมูลผู้ใช้เป็น student
                     await window.setDoc(window.doc(window.firebaseDb, 'users', userCredential.user.uid), {
                         email: email,
-                        createdAt: window.serverTimestamp(),
-                        role: 'student' // default role
+                        role: 'student',
+                        createdAt: window.serverTimestamp()
                     });
                     
                     showToast('สมัครสมาชิกสำเร็จ!', 'success');
@@ -918,92 +808,16 @@
                     case 'auth/invalid-email':
                         errorMessage = 'รูปแบบอีเมลไม่ถูกต้อง';
                         break;
-                    default:
-                        // Fallback to demo mode if Firebase fails
-                        console.log('Firebase failed, switching to demo mode');
-                        window.useLocalStorage = true;
-                        handleDemoAuth(email, password);
-                        return;
                 }
                 
                 showToast(errorMessage, 'error');
             }
         });
 
-        // จัดการ Authentication ใน Demo Mode
-        function handleDemoAuth(email, password) {
-            // ตรวจสอบรูปแบบอีเมล
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                showToast('รูปแบบอีเมลไม่ถูกต้อง', 'error');
-                return;
-            }
-            
-            // ตรวจสอบรหัสผ่าน
-            if (password.length < 6) {
-                showToast('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร', 'error');
-                return;
-            }
-            
-            const users = JSON.parse(localStorage.getItem('demoUsers') || '{}');
-            
-            if (isRegisterMode) {
-                // สมัครสมาชิก
-                if (users[email]) {
-                    showToast('อีเมลนี้ถูกใช้งานแล้ว', 'error');
-                    return;
-                }
-                
-                // สร้างผู้ใช้ใหม่
-                const newUser = {
-                    uid: 'demo_' + Date.now(),
-                    email: email,
-                    role: email === 'admin@demo.com' ? 'admin' : 'student',
-                    createdAt: new Date().toISOString()
-                };
-                
-                users[email] = { ...newUser, password: password };
-                localStorage.setItem('demoUsers', JSON.stringify(users));
-                
-                // ล็อกอินอัตโนมัติ
-                currentUser = newUser;
-                localStorage.setItem('demoUser', JSON.stringify(newUser));
-                
-                showToast('สมัครสมาชิกสำเร็จ! (Demo Mode)', 'success');
-                setTimeout(() => handleUserLogin(newUser), 1000);
-                
-            } else {
-                // เข้าสู่ระบบ
-                const user = users[email];
-                if (!user || user.password !== password) {
-                    showToast('อีเมลหรือรหัสผ่านไม่ถูกต้อง', 'error');
-                    return;
-                }
-                
-                // ล็อกอิน
-                currentUser = {
-                    uid: user.uid,
-                    email: user.email,
-                    role: user.role
-                };
-                localStorage.setItem('demoUser', JSON.stringify(currentUser));
-                
-                showToast('เข้าสู่ระบบสำเร็จ! (Demo Mode)', 'success');
-                setTimeout(() => handleUserLogin(currentUser), 1000);
-            }
-        }
-
         // ออกจากระบบ
         async function logout() {
             try {
-                if (window.useLocalStorage || !window.firebaseAuth) {
-                    // Demo Mode logout
-                    localStorage.removeItem('demoUser');
-                    currentUser = null;
-                } else {
-                    // Firebase logout
-                    await window.signOut(window.firebaseAuth);
-                }
+                await window.signOut(window.firebaseAuth);
                 
                 // รีเซ็ตตัวแปร
                 resetExamState();
@@ -1037,8 +851,8 @@
 
         // เริ่มการสอบ
         function startExam() {
-            if (!currentUser) {
-                showToast('กรุณาเข้าสู่ระบบก่อน', 'error');
+            if (!currentUser || userRole !== 'student') {
+                showToast('คุณไม่มีสิทธิ์เข้าสอบ', 'error');
                 return;
             }
             
@@ -1054,8 +868,7 @@
             const savedExam = localStorage.getItem('currentExam');
             if (savedExam) {
                 const examData = JSON.parse(savedExam);
-                const confirmResume = window.confirm('พบการสอบที่ยังไม่เสร็จสิ้น ต้องการทำต่อหรือไม่?');
-                if (confirmResume) {
+                if (confirm('พบการสอบที่ยังไม่เสร็จสิ้น ต้องการทำต่อหรือไม่?')) {
                     resumeExam(examData);
                     return;
                 } else {
@@ -1068,14 +881,14 @@
             
             // สุ่มลำดับตัวเลือกในแต่ละข้อ
             shuffledQuestions = shuffledQuestions.map(q => {
-                const correctAnswer = q.options[q.correct];
+                const correctAnswer = q.options[q.answer];
                 const shuffledOptions = shuffleArray([...q.options]);
                 const newCorrectIndex = shuffledOptions.indexOf(correctAnswer);
                 
                 return {
                     ...q,
                     options: shuffledOptions,
-                    correct: newCorrectIndex
+                    answer: newCorrectIndex
                 };
             });
 
@@ -1111,7 +924,7 @@
             };
         }
 
-        // บันทึกสถานะการสอบ
+        // บันทึกสถานะการสอบ (ป้องกัน refresh รีเซ็ตเวลา)
         function saveExamState() {
             const examState = {
                 currentQuestion,
@@ -1208,7 +1021,7 @@
                         </span>
                         <span class="text-gray-500 text-sm">${currentQuestion + 1}/${shuffledQuestions.length}</span>
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-800 leading-relaxed mb-6">${question.question}</h3>
+                    <h3 class="text-xl font-semibold text-gray-800 leading-relaxed mb-6">${question.questionText}</h3>
                 </div>
                 
                 <div class="space-y-4">
@@ -1292,7 +1105,7 @@
             document.getElementById('confirmModal').classList.add('hidden');
         }
 
-        // ส่งคำตอบ
+        // ส่งคำตอบ (ตรวจคะแนน client-side)
         async function submitExam() {
             hideConfirmModal();
             clearInterval(timerInterval);
@@ -1313,25 +1126,17 @@
                 score: score,
                 totalQuestions: shuffledQuestions.length,
                 answers: userAnswers,
-                correctAnswers: shuffledQuestions.map(q => q.correct),
+                correctAnswers: shuffledQuestions.map(q => q.answer),
                 timeUsed: formatTime(timeUsed),
                 startTime: examStartTime,
                 endTime: examEndTime,
                 device: navigator.userAgent,
-                submittedAt: new Date().toISOString()
+                submittedAt: window.serverTimestamp()
             };
             
-            // บันทึกผลสอบ
+            // บันทึกผลสอบลง Firestore
             try {
-                if (window.useLocalStorage || !window.firebaseDb) {
-                    // Demo Mode - บันทึกลง localStorage
-                    const examResults = JSON.parse(localStorage.getItem('demoExamResults') || '{}');
-                    examResults[currentUser.uid] = examData;
-                    localStorage.setItem('demoExamResults', JSON.stringify(examResults));
-                } else {
-                    // Firebase Mode
-                    await window.setDoc(window.doc(window.firebaseDb, 'examResults', currentUser.uid), examData);
-                }
+                await window.setDoc(window.doc(window.firebaseDb, 'examResults', currentUser.uid), examData);
                 
                 showToast('บันทึกผลการสอบสำเร็จ!', 'success');
                 
@@ -1353,7 +1158,7 @@
         function calculateScore() {
             let correct = 0;
             for (let i = 0; i < shuffledQuestions.length; i++) {
-                if (userAnswers[i] === shuffledQuestions[i].correct) {
+                if (userAnswers[i] === shuffledQuestions[i].answer) {
                     correct++;
                 }
             }
@@ -1378,11 +1183,11 @@
             for (let i = 0; i < shuffledQuestions.length; i++) {
                 const question = shuffledQuestions[i];
                 const userAnswer = userAnswers[i];
-                const isCorrect = userAnswer === question.correct;
+                const isCorrect = userAnswer === question.answer;
                 
                 detailsHTML += `
                     <div class="mb-4 p-4 rounded-xl ${isCorrect ? 'bg-green-50 border-l-4 border-green-500' : 'bg-red-50 border-l-4 border-red-500'}">
-                        <div class="font-semibold mb-3 text-gray-800">ข้อ ${i + 1}: ${question.question}</div>
+                        <div class="font-semibold mb-3 text-gray-800">ข้อ ${i + 1}: ${question.questionText}</div>
                         <div class="space-y-2 text-sm">
                             <div class="flex items-start">
                                 <span class="font-medium text-gray-600 mr-2">คำตอบของคุณ:</span> 
@@ -1393,7 +1198,7 @@
                             ${!isCorrect ? `
                                 <div class="flex items-start">
                                     <span class="font-medium text-gray-600 mr-2">คำตอบที่ถูก:</span> 
-                                    <span class="text-green-600 font-medium">${question.options[question.correct]}</span>
+                                    <span class="text-green-600 font-medium">${question.options[question.answer]}</span>
                                 </div>
                             ` : ''}
                         </div>
@@ -1407,28 +1212,26 @@
             showScreen('resultScreen');
         }
 
-        // โหลดข้อมูล Dashboard
+        // === Admin Dashboard Functions ===
+
+        // โหลดข้อมูล Dashboard (สำหรับ admin)
         async function loadDashboardData() {
+            if (userRole !== 'admin') {
+                showToast('คุณไม่มีสิทธิ์เข้าถึงหน้านี้', 'error');
+                await logout();
+                return;
+            }
+            
             showToast('กำลังโหลดข้อมูล...', 'info');
             
             try {
-                if (window.useLocalStorage || !window.firebaseDb) {
-                    // Demo Mode - โหลดจาก localStorage
-                    const examResults = JSON.parse(localStorage.getItem('demoExamResults') || '{}');
-                    allExamResults = Object.values(examResults).map((result, index) => ({
-                        id: result.uid || 'demo_' + index,
-                        ...result
-                    }));
-                } else {
-                    // Firebase Mode
-                    const q = window.query(window.collection(window.firebaseDb, 'examResults'), window.orderBy('submittedAt', 'desc'));
-                    const querySnapshot = await window.getDocs(q);
-                    
-                    allExamResults = [];
-                    querySnapshot.forEach((doc) => {
-                        allExamResults.push({ id: doc.id, ...doc.data() });
-                    });
-                }
+                const q = window.query(window.collection(window.firebaseDb, 'examResults'), window.orderBy('submittedAt', 'desc'));
+                const querySnapshot = await window.getDocs(q);
+                
+                allExamResults = [];
+                querySnapshot.forEach((doc) => {
+                    allExamResults.push({ id: doc.id, ...doc.data() });
+                });
                 
                 updateDashboardStats();
                 displayResults(allExamResults);
@@ -1472,7 +1275,7 @@
             noResults.classList.add('hidden');
             
             tbody.innerHTML = results.map((result, index) => {
-                const date = result.submittedAt ? new Date(result.submittedAt) : new Date();
+                const date = result.submittedAt ? new Date(result.submittedAt.seconds * 1000) : new Date();
                 const status = result.score >= 60 ? 'ผ่าน' : 'ไม่ผ่าน';
                 const statusClass = result.score >= 60 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
                 
@@ -1540,8 +1343,8 @@
                 case 'date':
                 default:
                     sortedResults.sort((a, b) => {
-                        const dateA = new Date(a.submittedAt || 0).getTime();
-                        const dateB = new Date(b.submittedAt || 0).getTime();
+                        const dateA = a.submittedAt ? a.submittedAt.seconds : 0;
+                        const dateB = b.submittedAt ? b.submittedAt.seconds : 0;
                         return dateB - dateA;
                     });
                     break;
@@ -1562,7 +1365,7 @@
             const csvContent = [
                 headers.join(','),
                 ...allExamResults.map((result, index) => {
-                    const date = result.submittedAt ? new Date(result.submittedAt) : new Date();
+                    const date = result.submittedAt ? new Date(result.submittedAt.seconds * 1000) : new Date();
                     const status = result.score >= 60 ? 'ผ่าน' : 'ไม่ผ่าน';
                     
                     return [
@@ -1589,6 +1392,145 @@
             document.body.removeChild(link);
             
             showToast('Export ข้อมูลสำเร็จ!', 'success');
+        }
+
+        // === Question Management Functions ===
+
+        // แสดงหน้าจัดการข้อสอบ
+        async function showQuestionManager() {
+            if (userRole !== 'admin') {
+                showToast('คุณไม่มีสิทธิ์เข้าถึงหน้านี้', 'error');
+                return;
+            }
+            
+            await loadQuestionsFromFirebase();
+            displayQuestionsList();
+            showScreen('questionManagerScreen');
+        }
+
+        // แสดงฟอร์มเพิ่มข้อสอบ
+        function showAddQuestionForm() {
+            document.getElementById('addQuestionForm').classList.remove('hidden');
+            document.getElementById('questionText').focus();
+        }
+
+        // ซ่อนฟอร์มเพิ่มข้อสอบ
+        function hideAddQuestionForm() {
+            document.getElementById('addQuestionForm').classList.add('hidden');
+            document.getElementById('questionForm').reset();
+        }
+
+        // จัดการฟอร์มเพิ่มข้อสอบ
+        document.getElementById('questionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const questionText = document.getElementById('questionText').value.trim();
+            const option1 = document.getElementById('option1').value.trim();
+            const option2 = document.getElementById('option2').value.trim();
+            const option3 = document.getElementById('option3').value.trim();
+            const option4 = document.getElementById('option4').value.trim();
+            const correctAnswer = parseInt(document.getElementById('correctAnswer').value);
+            const category = document.getElementById('category').value.trim() || 'ทั่วไป';
+            
+            if (!questionText || !option1 || !option2 || !option3 || !option4 || correctAnswer === '') {
+                showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'error');
+                return;
+            }
+            
+            showToast('กำลังบันทึกข้อสอบ...', 'info');
+            
+            try {
+                // เพิ่มข้อสอบใหม่ลง Firestore
+                await window.addDoc(window.collection(window.firebaseDb, 'questionBank'), {
+                    questionText: questionText,
+                    options: [option1, option2, option3, option4],
+                    answer: correctAnswer,
+                    category: category,
+                    createdAt: window.serverTimestamp()
+                });
+                
+                showToast('เพิ่มข้อสอบสำเร็จ!', 'success');
+                hideAddQuestionForm();
+                await loadQuestionsFromFirebase();
+                displayQuestionsList();
+                
+            } catch (error) {
+                console.error('Error adding question:', error);
+                showToast('เกิดข้อผิดพลาดในการเพิ่มข้อสอบ', 'error');
+            }
+        });
+
+        // แสดงรายการข้อสอบ
+        function displayQuestionsList() {
+            const questionsList = document.getElementById('questionsList');
+            const noQuestions = document.getElementById('noQuestions');
+            const questionCount = document.getElementById('questionCount');
+            
+            questionCount.textContent = `จำนวน: ${examQuestions.length} ข้อ`;
+            
+            if (examQuestions.length === 0) {
+                questionsList.innerHTML = '';
+                noQuestions.classList.remove('hidden');
+                return;
+            }
+            
+            noQuestions.classList.add('hidden');
+            
+            questionsList.innerHTML = examQuestions.map((question, index) => `
+                <div class="p-6 hover:bg-gray-50 transition-colors">
+                    <div class="flex justify-between items-start gap-4">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-3">
+                                <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
+                                    ข้อ ${index + 1}
+                                </span>
+                                <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-xs font-semibold">
+                                    ${question.category}
+                                </span>
+                            </div>
+                            <h4 class="text-lg font-semibold text-gray-800 mb-4">${question.questionText}</h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                ${question.options.map((option, optIndex) => `
+                                    <div class="flex items-center p-3 rounded-lg ${optIndex === question.answer ? 'bg-green-50 border-2 border-green-200' : 'bg-gray-50'}">
+                                        <span class="font-medium text-sm mr-3 ${optIndex === question.answer ? 'text-green-600' : 'text-gray-600'}">
+                                            ${String.fromCharCode(65 + optIndex)}.
+                                        </span>
+                                        <span class="${optIndex === question.answer ? 'text-green-800 font-medium' : 'text-gray-700'}">${option}</span>
+                                        ${optIndex === question.answer ? '<span class="ml-2 text-green-600">✓</span>' : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="deleteQuestion('${question.id}')" 
+                                    class="bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg transition-colors touch-target">
+                                🗑️
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ลบข้อสอบ
+        async function deleteQuestion(questionId) {
+            if (!confirm('คุณแน่ใจหรือไม่ที่จะลบข้อสอบนี้?')) {
+                return;
+            }
+            
+            showToast('กำลังลบข้อสอบ...', 'info');
+            
+            try {
+                await window.deleteDoc(window.doc(window.firebaseDb, 'questionBank', questionId));
+                
+                showToast('ลบข้อสอบสำเร็จ!', 'success');
+                await loadQuestionsFromFirebase();
+                displayQuestionsList();
+                
+            } catch (error) {
+                console.error('Error deleting question:', error);
+                showToast('เกิดข้อผิดพลาดในการลบข้อสอบ', 'error');
+            }
         }
 
         // แสดงหน้าจอ
@@ -1630,252 +1572,11 @@
             }
         });
 
-        // === Question Management Functions ===
-
-        // แสดงหน้าจัดการข้อสอบ
-        async function showQuestionManager() {
-            await loadQuestionsFromFirebase();
-            displayQuestionsList();
-            showScreen('questionManagerScreen');
-        }
-
-        // แสดงฟอร์มเพิ่มข้อสอบ
-        function showAddQuestionForm() {
-            document.getElementById('addQuestionForm').classList.remove('hidden');
-            document.getElementById('questionText').focus();
-        }
-
-        // ซ่อนฟอร์มเพิ่มข้อสอบ
-        function hideAddQuestionForm() {
-            document.getElementById('addQuestionForm').classList.add('hidden');
-            document.getElementById('questionForm').reset();
-        }
-
-        // จัดการฟอร์มเพิ่มข้อสอบ
-        document.getElementById('questionForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const questionText = document.getElementById('questionText').value.trim();
-            const option1 = document.getElementById('option1').value.trim();
-            const option2 = document.getElementById('option2').value.trim();
-            const option3 = document.getElementById('option3').value.trim();
-            const option4 = document.getElementById('option4').value.trim();
-            const correctAnswer = parseInt(document.getElementById('correctAnswer').value);
-            
-            if (!questionText || !option1 || !option2 || !option3 || !option4 || correctAnswer === '') {
-                showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'error');
-                return;
-            }
-            
-            showToast('กำลังบันทึกข้อสอบ...', 'info');
-            
-            try {
-                const newQuestion = {
-                    id: 'demo_' + Date.now(),
-                    question: questionText,
-                    options: [option1, option2, option3, option4],
-                    correct: correctAnswer,
-                    createdAt: new Date().toISOString()
-                };
-                
-                if (window.useLocalStorage || !window.firebaseDb) {
-                    // Demo Mode - บันทึกลง localStorage
-                    examQuestions.push(newQuestion);
-                    localStorage.setItem('demoQuestions', JSON.stringify(examQuestions));
-                } else {
-                    // Firebase Mode
-                    await window.addDoc(window.collection(window.firebaseDb, 'questions'), {
-                        question: questionText,
-                        options: [option1, option2, option3, option4],
-                        correct: correctAnswer,
-                        createdAt: window.serverTimestamp()
-                    });
-                    await loadQuestionsFromFirebase();
-                }
-                
-                showToast('เพิ่มข้อสอบสำเร็จ!', 'success');
-                hideAddQuestionForm();
-                displayQuestionsList();
-                
-            } catch (error) {
-                console.error('Error adding question:', error);
-                showToast('เกิดข้อผิดพลาดในการเพิ่มข้อสอบ', 'error');
-            }
-        });
-
-        // แสดงรายการข้อสอบ
-        function displayQuestionsList() {
-            const questionsList = document.getElementById('questionsList');
-            const noQuestions = document.getElementById('noQuestions');
-            const questionCount = document.getElementById('questionCount');
-            
-            questionCount.textContent = `จำนวน: ${examQuestions.length} ข้อ`;
-            
-            if (examQuestions.length === 0) {
-                questionsList.innerHTML = '';
-                noQuestions.classList.remove('hidden');
-                return;
-            }
-            
-            noQuestions.classList.add('hidden');
-            
-            questionsList.innerHTML = examQuestions.map((question, index) => `
-                <div class="p-6 hover:bg-gray-50 transition-colors">
-                    <div class="flex justify-between items-start gap-4">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-3 mb-3">
-                                <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
-                                    ข้อ ${index + 1}
-                                </span>
-                            </div>
-                            <h4 class="text-lg font-semibold text-gray-800 mb-4">${question.question}</h4>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                ${question.options.map((option, optIndex) => `
-                                    <div class="flex items-center p-3 rounded-lg ${optIndex === question.correct ? 'bg-green-50 border-2 border-green-200' : 'bg-gray-50'}">
-                                        <span class="font-medium text-sm mr-3 ${optIndex === question.correct ? 'text-green-600' : 'text-gray-600'}">
-                                            ${String.fromCharCode(65 + optIndex)}.
-                                        </span>
-                                        <span class="${optIndex === question.correct ? 'text-green-800 font-medium' : 'text-gray-700'}">${option}</span>
-                                        ${optIndex === question.correct ? '<span class="ml-2 text-green-600">✓</span>' : ''}
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                        <div class="flex gap-2">
-                            <button onclick="editQuestion('${question.id}')" 
-                                    class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors touch-target">
-                                ✏️
-                            </button>
-                            <button onclick="deleteQuestion('${question.id}')" 
-                                    class="bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg transition-colors touch-target">
-                                🗑️
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // แก้ไขข้อสอบ
-        function editQuestion(questionId) {
-            const question = examQuestions.find(q => q.id === questionId);
-            if (!question) return;
-            
-            document.getElementById('editQuestionId').value = questionId;
-            document.getElementById('editQuestionText').value = question.question;
-            document.getElementById('editOption1').value = question.options[0];
-            document.getElementById('editOption2').value = question.options[1];
-            document.getElementById('editOption3').value = question.options[2];
-            document.getElementById('editOption4').value = question.options[3];
-            document.getElementById('editCorrectAnswer').value = question.correct;
-            
-            document.getElementById('editQuestionModal').classList.remove('hidden');
-        }
-
-        // ซ่อน Modal แก้ไข
-        function hideEditQuestionModal() {
-            document.getElementById('editQuestionModal').classList.add('hidden');
-            document.getElementById('editQuestionForm').reset();
-        }
-
-        // จัดการฟอร์มแก้ไขข้อสอบ
-        document.getElementById('editQuestionForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const questionId = document.getElementById('editQuestionId').value;
-            const questionText = document.getElementById('editQuestionText').value.trim();
-            const option1 = document.getElementById('editOption1').value.trim();
-            const option2 = document.getElementById('editOption2').value.trim();
-            const option3 = document.getElementById('editOption3').value.trim();
-            const option4 = document.getElementById('editOption4').value.trim();
-            const correctAnswer = parseInt(document.getElementById('editCorrectAnswer').value);
-            
-            if (!questionText || !option1 || !option2 || !option3 || !option4 || correctAnswer === '') {
-                showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'error');
-                return;
-            }
-            
-            showToast('กำลังบันทึกการแก้ไข...', 'info');
-            
-            try {
-                if (window.useLocalStorage || !window.firebaseDb) {
-                    // Demo Mode - แก้ไขใน localStorage
-                    const questionIndex = examQuestions.findIndex(q => q.id === questionId);
-                    if (questionIndex !== -1) {
-                        examQuestions[questionIndex] = {
-                            ...examQuestions[questionIndex],
-                            question: questionText,
-                            options: [option1, option2, option3, option4],
-                            correct: correctAnswer,
-                            updatedAt: new Date().toISOString()
-                        };
-                        localStorage.setItem('demoQuestions', JSON.stringify(examQuestions));
-                    }
-                } else {
-                    // Firebase Mode
-                    await window.setDoc(window.doc(window.firebaseDb, 'questions', questionId), {
-                        question: questionText,
-                        options: [option1, option2, option3, option4],
-                        correct: correctAnswer,
-                        updatedAt: window.serverTimestamp()
-                    }, { merge: true });
-                    await loadQuestionsFromFirebase();
-                }
-                
-                showToast('แก้ไขข้อสอบสำเร็จ!', 'success');
-                hideEditQuestionModal();
-                displayQuestionsList();
-                
-            } catch (error) {
-                console.error('Error updating question:', error);
-                showToast('เกิดข้อผิดพลาดในการแก้ไขข้อสอบ', 'error');
-            }
-        });
-
-        // ลบข้อสอบ
-        function deleteQuestion(questionId) {
-            questionToDelete = questionId;
-            document.getElementById('deleteConfirmModal').classList.remove('hidden');
-        }
-
-        // ซ่อน Modal ยืนยันการลบ
-        function hideDeleteConfirmModal() {
-            document.getElementById('deleteConfirmModal').classList.add('hidden');
-            questionToDelete = null;
-        }
-
-        // ยืนยันการลบข้อสอบ
-        async function confirmDeleteQuestion() {
-            if (!questionToDelete) return;
-            
-            showToast('กำลังลบข้อสอบ...', 'info');
-            
-            try {
-                if (window.useLocalStorage || !window.firebaseDb) {
-                    // Demo Mode - ลบจาก localStorage
-                    examQuestions = examQuestions.filter(q => q.id !== questionToDelete);
-                    localStorage.setItem('demoQuestions', JSON.stringify(examQuestions));
-                } else {
-                    // Firebase Mode
-                    await window.deleteDoc(window.doc(window.firebaseDb, 'questions', questionToDelete));
-                    await loadQuestionsFromFirebase();
-                }
-                
-                showToast('ลบข้อสอบสำเร็จ!', 'success');
-                hideDeleteConfirmModal();
-                displayQuestionsList();
-                
-            } catch (error) {
-                console.error('Error deleting question:', error);
-                showToast('เกิดข้อผิดพลาดในการลบข้อสอบ', 'error');
-            }
-        }
-
         // เริ่มต้นเมื่อโหลดหน้า
         document.addEventListener('DOMContentLoaded', function() {
             // ให้ focus ที่ช่องอีเมล
             document.getElementById('email').focus();
         });
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99f3ef85b53445ba',t:'MTc2MzI2NDA5OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99f417d3c35845c4',t:'MTc2MzI2NTc0OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
