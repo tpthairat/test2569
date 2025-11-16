@@ -111,49 +111,73 @@
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
         import { getFirestore, collection, addDoc, doc, getDoc, setDoc, getDocs, query, orderBy, where, serverTimestamp, deleteDoc, updateDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
 
-        // Firebase Configuration - แทนที่ด้วย Config ของคุณ
+        // Firebase Configuration - ใช้ Demo Config สำหรับทดสอบ
         const firebaseConfig = {
-            apiKey: "your-api-key",
-            authDomain: "your-project.firebaseapp.com",
-            projectId: "your-project-id",
-            storageBucket: "your-project.appspot.com",
-            messagingSenderId: "123456789",
-            appId: "your-app-id"
+            apiKey: "AIzaSyDemoKeyForTesting123456789",
+            authDomain: "demo-project.firebaseapp.com", 
+            projectId: "demo-project-12345",
+            storageBucket: "demo-project.appspot.com",
+            messagingSenderId: "123456789012",
+            appId: "1:123456789012:web:abcdef123456"
         };
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        let app, auth, db;
         
-        // Global Firebase functions
-        window.firebaseAuth = auth;
-        window.firebaseDb = db;
-        window.signInWithEmailAndPassword = signInWithEmailAndPassword;
-        window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
-        window.signOut = signOut;
-        window.onAuthStateChanged = onAuthStateChanged;
-        window.collection = collection;
-        window.addDoc = addDoc;
-        window.doc = doc;
-        window.getDoc = getDoc;
-        window.setDoc = setDoc;
-        window.getDocs = getDocs;
-        window.query = query;
-        window.orderBy = orderBy;
-        window.where = where;
-        window.serverTimestamp = serverTimestamp;
-        window.deleteDoc = deleteDoc;
-        window.updateDoc = updateDoc;
-        window.onSnapshot = onSnapshot;
-        
-        // Initialize app when Firebase is ready
-        window.initializeApp = function() {
-            checkAuthState();
-        };
-        
-        // Auto-initialize
-        window.initializeApp();
+        try {
+            // Initialize Firebase
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            
+            console.log('Firebase initialized successfully');
+            
+            // Global Firebase functions
+            window.firebaseAuth = auth;
+            window.firebaseDb = db;
+            window.firebaseApp = app;
+            window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+            window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+            window.signOut = signOut;
+            window.onAuthStateChanged = onAuthStateChanged;
+            window.collection = collection;
+            window.addDoc = addDoc;
+            window.doc = doc;
+            window.getDoc = getDoc;
+            window.setDoc = setDoc;
+            window.getDocs = getDocs;
+            window.query = query;
+            window.orderBy = orderBy;
+            window.where = where;
+            window.serverTimestamp = serverTimestamp;
+            window.deleteDoc = deleteDoc;
+            window.updateDoc = updateDoc;
+            window.onSnapshot = onSnapshot;
+            
+            // Initialize app when Firebase is ready
+            window.initializeApp = function() {
+                checkAuthState();
+            };
+            
+            // Auto-initialize with delay to ensure DOM is ready
+            setTimeout(() => {
+                window.initializeApp();
+            }, 100);
+            
+        } catch (error) {
+            console.error('Firebase initialization error:', error);
+            
+            // Fallback: Use localStorage for demo purposes
+            window.useLocalStorage = true;
+            
+            // Mock Firebase functions for demo
+            window.firebaseAuth = null;
+            window.firebaseDb = null;
+            
+            // Initialize demo mode
+            setTimeout(() => {
+                initializeDemoMode();
+            }, 100);
+        }
     </script><!-- Login Screen -->
   <div id="loginScreen" class="min-h-full flex items-center justify-center mobile-padding py-8">
    <div class="w-full max-w-md fade-in"><!-- Header -->
@@ -163,6 +187,21 @@
      </div>
      <h1 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-3">ระบบสอบออนไลน์</h1>
      <p class="text-lg text-gray-600">เข้าสู่ระบบเพื่อเริ่มทำข้อสอบ</p>
+    </div><!-- Demo Mode Notice -->
+    <div id="demoNotice" class="hidden bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-2xl p-4 mb-6">
+     <div class="flex items-center">
+      <div class="text-2xl mr-3">
+       🔧
+      </div>
+      <div>
+       <div class="font-semibold">
+        Demo Mode
+       </div>
+       <div class="text-sm opacity-90">
+        ระบบทำงานด้วย localStorage | ทดลอง: admin@demo.com / 123456
+       </div>
+      </div>
+     </div>
     </div><!-- Login Form -->
     <div class="bg-white rounded-2xl p-6 shadow-lg mb-6">
      <form id="loginForm" class="space-y-6">
@@ -522,8 +561,52 @@
         let questionToDelete = null;
         let examinerName = '';
 
+        // เริ่มต้น Demo Mode (ใช้ localStorage แทน Firebase)
+        function initializeDemoMode() {
+            console.log('Starting Demo Mode - using localStorage');
+            
+            // แสดงข้อความแจ้งเตือน
+            showToast('🔧 Demo Mode: ใช้ localStorage แทน Firebase', 'info');
+            
+            // แสดง Demo Notice
+            document.getElementById('demoNotice').classList.remove('hidden');
+            
+            // สร้าง Admin account เริ่มต้น
+            const users = JSON.parse(localStorage.getItem('demoUsers') || '{}');
+            if (!users['admin@demo.com']) {
+                users['admin@demo.com'] = {
+                    uid: 'demo_admin',
+                    email: 'admin@demo.com',
+                    role: 'admin',
+                    password: '123456',
+                    createdAt: new Date().toISOString()
+                };
+                localStorage.setItem('demoUsers', JSON.stringify(users));
+            }
+            
+            // ตรวจสอบการล็อกอินจาก localStorage
+            const savedUser = localStorage.getItem('demoUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                handleUserLogin(currentUser);
+            } else {
+                showScreen('loginScreen');
+            }
+        }
+
         // ตรวจสอบสถานะการล็อกอิน
         function checkAuthState() {
+            if (window.useLocalStorage) {
+                initializeDemoMode();
+                return;
+            }
+            
+            if (!window.firebaseAuth) {
+                console.error('Firebase Auth not available');
+                initializeDemoMode();
+                return;
+            }
+            
             window.onAuthStateChanged(window.firebaseAuth, async (user) => {
                 if (user) {
                     currentUser = user;
@@ -540,14 +623,23 @@
             showToast('กำลังตรวจสอบข้อมูล...', 'info');
             
             try {
-                // โหลดข้อสอบจาก Firebase
+                // โหลดข้อสอบ
                 await loadQuestionsFromFirebase();
                 
                 // ตรวจสอบว่าเป็น admin หรือไม่
-                const userDoc = await window.getDoc(window.doc(window.firebaseDb, 'users', user.uid));
-                const userData = userDoc.data();
+                let isAdmin = false;
                 
-                if (userData && userData.role === 'admin') {
+                if (window.useLocalStorage || !window.firebaseDb) {
+                    // Demo Mode - ตรวจสอบจาก role ใน user object
+                    isAdmin = user.role === 'admin';
+                } else {
+                    // Firebase Mode
+                    const userDoc = await window.getDoc(window.doc(window.firebaseDb, 'users', user.uid));
+                    const userData = userDoc.data();
+                    isAdmin = userData && userData.role === 'admin';
+                }
+                
+                if (isAdmin) {
                     // แสดง Dashboard สำหรับ admin
                     await loadDashboardData();
                     showScreen('dashboardScreen');
@@ -555,11 +647,25 @@
                 }
                 
                 // ตรวจสอบว่าทำข้อสอบแล้วหรือยัง
-                const examDoc = await window.getDoc(window.doc(window.firebaseDb, 'examResults', user.uid));
+                let hasExamResult = false;
+                let examData = null;
                 
-                if (examDoc.exists()) {
+                if (window.useLocalStorage || !window.firebaseDb) {
+                    // Demo Mode - ตรวจสอบจาก localStorage
+                    const examResults = JSON.parse(localStorage.getItem('demoExamResults') || '{}');
+                    examData = examResults[user.uid];
+                    hasExamResult = !!examData;
+                } else {
+                    // Firebase Mode
+                    const examDoc = await window.getDoc(window.doc(window.firebaseDb, 'examResults', user.uid));
+                    hasExamResult = examDoc.exists();
+                    if (hasExamResult) {
+                        examData = examDoc.data();
+                    }
+                }
+                
+                if (hasExamResult) {
                     // ทำข้อสอบแล้ว - แสดงผลการสอบ
-                    const examData = examDoc.data();
                     showUserScore(examData);
                     showScreen('alreadyTakenScreen');
                 } else {
@@ -573,32 +679,51 @@
             }
         }
 
-        // โหลดข้อสอบจาก Firebase
+        // โหลดข้อสอบจาก Firebase หรือ localStorage
         async function loadQuestionsFromFirebase() {
             try {
-                const q = window.query(window.collection(window.firebaseDb, 'questions'), window.orderBy('createdAt', 'asc'));
-                const querySnapshot = await window.getDocs(q);
-                
-                examQuestions = [];
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    examQuestions.push({
-                        id: doc.id,
-                        question: data.question,
-                        options: data.options,
-                        correct: data.correct
+                if (window.useLocalStorage || !window.firebaseDb) {
+                    // Demo Mode - โหลดจาก localStorage
+                    const savedQuestions = localStorage.getItem('demoQuestions');
+                    if (savedQuestions) {
+                        examQuestions = JSON.parse(savedQuestions);
+                    } else {
+                        // ใช้ข้อสอบเริ่มต้นและบันทึกลง localStorage
+                        examQuestions = getDefaultQuestions().map((q, index) => ({
+                            id: 'demo_' + index,
+                            ...q
+                        }));
+                        localStorage.setItem('demoQuestions', JSON.stringify(examQuestions));
+                    }
+                } else {
+                    // Firebase Mode
+                    const q = window.query(window.collection(window.firebaseDb, 'questions'), window.orderBy('createdAt', 'asc'));
+                    const querySnapshot = await window.getDocs(q);
+                    
+                    examQuestions = [];
+                    querySnapshot.forEach((doc) => {
+                        const data = doc.data();
+                        examQuestions.push({
+                            id: doc.id,
+                            question: data.question,
+                            options: data.options,
+                            correct: data.correct
+                        });
                     });
-                });
-                
-                // ถ้าไม่มีข้อสอบใน Firebase ให้ใช้ข้อสอบเริ่มต้น
-                if (examQuestions.length === 0) {
-                    await createDefaultQuestions();
+                    
+                    // ถ้าไม่มีข้อสอบใน Firebase ให้ใช้ข้อสอบเริ่มต้น
+                    if (examQuestions.length === 0) {
+                        await createDefaultQuestions();
+                    }
                 }
                 
             } catch (error) {
                 console.error('Error loading questions:', error);
                 // ใช้ข้อสอบเริ่มต้นถ้าโหลดไม่ได้
-                examQuestions = getDefaultQuestions();
+                examQuestions = getDefaultQuestions().map((q, index) => ({
+                    id: 'demo_' + index,
+                    ...q
+                }));
             }
         }
 
@@ -747,6 +872,12 @@
             
             showToast('กำลังดำเนินการ...', 'info');
             
+            // ใช้ Demo Mode ถ้า Firebase ไม่พร้อม
+            if (window.useLocalStorage || !window.firebaseAuth) {
+                handleDemoAuth(email, password);
+                return;
+            }
+            
             try {
                 if (isRegisterMode) {
                     // สมัครสมาชิก
@@ -785,18 +916,96 @@
                     case 'auth/invalid-email':
                         errorMessage = 'รูปแบบอีเมลไม่ถูกต้อง';
                         break;
+                    default:
+                        // Fallback to demo mode if Firebase fails
+                        console.log('Firebase failed, switching to demo mode');
+                        window.useLocalStorage = true;
+                        handleDemoAuth(email, password);
+                        return;
                 }
                 
                 showToast(errorMessage, 'error');
             }
         });
 
+        // จัดการ Authentication ใน Demo Mode
+        function handleDemoAuth(email, password) {
+            // ตรวจสอบรูปแบบอีเมล
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showToast('รูปแบบอีเมลไม่ถูกต้อง', 'error');
+                return;
+            }
+            
+            // ตรวจสอบรหัสผ่าน
+            if (password.length < 6) {
+                showToast('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร', 'error');
+                return;
+            }
+            
+            const users = JSON.parse(localStorage.getItem('demoUsers') || '{}');
+            
+            if (isRegisterMode) {
+                // สมัครสมาชิก
+                if (users[email]) {
+                    showToast('อีเมลนี้ถูกใช้งานแล้ว', 'error');
+                    return;
+                }
+                
+                // สร้างผู้ใช้ใหม่
+                const newUser = {
+                    uid: 'demo_' + Date.now(),
+                    email: email,
+                    role: email === 'admin@demo.com' ? 'admin' : 'student',
+                    createdAt: new Date().toISOString()
+                };
+                
+                users[email] = { ...newUser, password: password };
+                localStorage.setItem('demoUsers', JSON.stringify(users));
+                
+                // ล็อกอินอัตโนมัติ
+                currentUser = newUser;
+                localStorage.setItem('demoUser', JSON.stringify(newUser));
+                
+                showToast('สมัครสมาชิกสำเร็จ! (Demo Mode)', 'success');
+                setTimeout(() => handleUserLogin(newUser), 1000);
+                
+            } else {
+                // เข้าสู่ระบบ
+                const user = users[email];
+                if (!user || user.password !== password) {
+                    showToast('อีเมลหรือรหัสผ่านไม่ถูกต้อง', 'error');
+                    return;
+                }
+                
+                // ล็อกอิน
+                currentUser = {
+                    uid: user.uid,
+                    email: user.email,
+                    role: user.role
+                };
+                localStorage.setItem('demoUser', JSON.stringify(currentUser));
+                
+                showToast('เข้าสู่ระบบสำเร็จ! (Demo Mode)', 'success');
+                setTimeout(() => handleUserLogin(currentUser), 1000);
+            }
+        }
+
         // ออกจากระบบ
         async function logout() {
             try {
-                await window.signOut(window.firebaseAuth);
+                if (window.useLocalStorage || !window.firebaseAuth) {
+                    // Demo Mode logout
+                    localStorage.removeItem('demoUser');
+                    currentUser = null;
+                } else {
+                    // Firebase logout
+                    await window.signOut(window.firebaseAuth);
+                }
+                
                 // รีเซ็ตตัวแปร
                 resetExamState();
+                showScreen('loginScreen');
                 showToast('ออกจากระบบสำเร็จ', 'success');
             } catch (error) {
                 console.error('Logout error:', error);
@@ -1605,5 +1814,5 @@
             document.getElementById('email').focus();
         });
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99f3a963832045cf',t:'MTc2MzI2MTIyNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99f3c036b1a14ba0',t:'MTc2MzI2MjE2MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
